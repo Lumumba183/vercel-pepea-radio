@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --red: #dc2626;
+  --red-dark: #b91c1c;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --gold: #f59e0b;
+  --bg: #0a0e1a;
+  --bg-light: #111827;
+  --card: #1f2937;
+  --card-hover: #27354f;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+  --border: #374151;
+  --success: #10b981;
+  --warning: #f59e0b;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding-bottom: 90px;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--red); }
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 60px rgba(220, 38, 38, 0.3), 0 0 60px rgba(37, 99, 235, 0.2); }
+  50% { box-shadow: 0 0 80px rgba(220, 38, 38, 0.5), 0 0 80px rgba(37, 99, 235, 0.4); }
+}
+
+.toast {
+  position: fixed; bottom: 100px; right: 1.5rem;
+  background: var(--card); border: 1px solid var(--border);
+  padding: 1rem 1.5rem; border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 2000;
+  display: flex; align-items: center; gap: 0.75rem;
+  transform: translateX(150%); transition: transform 0.3s ease;
+}
+
+.toast.show { transform: translateX(0); }
+
+.admin-table {
+  width: 100%; border-collapse: collapse;
+}
+
+.admin-table th, .admin-table td {
+  padding: 0.875rem 1rem; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table th {
+  color: var(--text-muted); font-weight: 600; font-size: 0.8125rem;
+  text-transform: uppercase;
+}
+
+.admin-table td { color: var(--text); font-size: 0.9375rem; }
+
+.admin-table tr:hover td { background: rgba(37, 99, 235, 0.05); }
+
+.badge {
+  display: inline-block; padding: 0.25rem 0.75rem;
+  border-radius: 9999px; font-size: 0.75rem; font-weight: 600;
+}
+
+.article-body p { margin-bottom: 1.5rem; }
+.article-body h3 {
+  font-size: 1.5rem; font-weight: 700; margin: 2rem 0 1rem;
+}
