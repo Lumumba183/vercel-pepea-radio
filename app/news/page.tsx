@@ -18,9 +18,10 @@ export default function NewsPage() {
     fetch('/api/articles')
       .then(r => r.json())
       .then(data => {
-        setArticles(data)
+        if (Array.isArray(data)) setArticles(data)
         setLoading(false)
       })
+      .catch(() => setLoading(false))
   }, [])
 
   const filtered = activeCategory === 'All' ? articles : articles.filter(a => a.category === activeCategory)

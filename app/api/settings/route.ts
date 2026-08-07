@@ -2,18 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
 
 export async function GET() {
-  const { data, error } = await supabase
-    .from('settings')
-    .select('*')
-    .eq('id', 1)
-    .single()
-  if (error) {
-    if (error.code === 'PGRST116') {
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('*')
+      .eq('id', 1)
+      .single()
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ stream_url: 'https://stream.zeno.fm/placeholder', youtube_channel_id: '' })
+      }
+      // Return fallback on any error so site doesn't crash
       return NextResponse.json({ stream_url: 'https://stream.zeno.fm/placeholder', youtube_channel_id: '' })
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data)
+  } catch {
+    return NextResponse.json({ stream_url: 'https://stream.zeno.fm/placeholder', youtube_channel_id: '' })
   }
-  return NextResponse.json(data)
 }
 
 export async function PUT(req: NextRequest) {

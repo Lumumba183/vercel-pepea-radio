@@ -30,19 +30,33 @@ export default function AdminPage() {
     if (!isLoaded) return
     if (!user) return
 
-    fetch('/api/users')
+    // Check admin via server-side API (can read ADMIN_EMAIL env var)
+    fetch('/api/check-admin')
       .then(r => r.json())
-      .then((users) => {
-        const me = users.find((u: any) => u.email === user.primaryEmailAddress?.emailAddress)
-        if (me?.role === 'admin') setIsAdmin(true)
-        else if (user.primaryEmailAddress?.emailAddress === process.env.NEXT_PUBLIC_ADMIN_EMAIL) setIsAdmin(true)
+      .then(({ adminEmail }) => {
+        const userEmail = user.primaryEmailAddress?.emailAddress || ''
+        if (userEmail.toLowerCase() === (adminEmail || '').toLowerCase()) {
+          setIsAdmin(true)
+        }
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(() => {
+        // Fallback: try checking via users API
+        fetch('/api/users')
+          .then(r => r.json())
+          .then((users) => {
+            if (Array.isArray(users)) {
+              const me = users.find((u: any) => u.email === user.primaryEmailAddress?.emailAddress)
+              if (me?.role === 'admin') setIsAdmin(true)
+            }
+            setLoading(false)
+          })
+          .catch(() => setLoading(false))
+      })
 
-    fetch('/api/articles').then(r => r.json()).then(setArticles)
-    fetch('/api/schedule').then(r => r.json()).then(setSchedule)
-    fetch('/api/reports').then(r => r.json()).then(setReports)
+    fetch('/api/articles').then(r => r.json()).then(data => { if (Array.isArray(data)) setArticles(data) })
+    fetch('/api/schedule').then(r => r.json()).then(data => { if (Array.isArray(data)) setSchedule(data) })
+    fetch('/api/reports').then(r => r.json()).then(data => { if (Array.isArray(data)) setReports(data) })
   }, [isLoaded, user])
 
   if (!isLoaded || loading) {

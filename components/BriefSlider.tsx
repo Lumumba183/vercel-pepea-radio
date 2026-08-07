@@ -22,7 +22,11 @@ export default function BriefSlider() {
   useEffect(() => {
     fetch('/api/brief')
       .then(r => r.json())
-      .then(data => setItems(data || []))
+      .then(data => {
+        if (Array.isArray(data)) setItems(data)
+        else setItems([])
+      })
+      .catch(() => setItems([]))
   }, [])
 
   useEffect(() => {
