@@ -17,16 +17,26 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!isLoaded) return
     if (!user) { setLoading(false); return }
-    Promise.all([
-      fetch('/api/users').then(r => r.json()),
-      fetch('/api/settings').then(r => r.json()),
-    ]).then(([users, settings]) => {
-      const me = users.find((u: any) => u.email === user.primaryEmailAddress?.emailAddress)
-      if (me?.role === 'admin') setIsAdmin(true)
-      setStreamUrl(settings?.stream_url || '')
-      setYoutubeId(settings?.youtube_channel_id || '')
-      setLoading(false)
-    }).catch(() => setLoading(false))
+
+    // Check admin via server-side API (reads ADMIN_EMAIL env var)
+    fetch('/api/check-admin')
+      .then(r => r.json())
+      .then(({ adminEmail }) => {
+        const userEmail = user.primaryEmailAddress?.emailAddress || ''
+        if (userEmail.toLowerCase() === (adminEmail || '').toLowerCase()) {
+          setIsAdmin(true)
+        }
+      })
+      .catch(() => {})
+
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(settings => {
+        setStreamUrl(settings?.stream_url || '')
+        setYoutubeId(settings?.youtube_channel_id || '')
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [isLoaded, user])
 
   const save = async () => {

@@ -28,15 +28,24 @@ export default function BriefPage() {
   useEffect(() => {
     if (!isLoaded) return
     if (!user) { setLoading(false); return }
+
+    // Check admin via server-side API (reads ADMIN_EMAIL env var)
+    fetch('/api/check-admin')
+      .then(r => r.json())
+      .then(({ adminEmail }) => {
+        const userEmail = user.primaryEmailAddress?.emailAddress || ''
+        if (userEmail.toLowerCase() === (adminEmail || '').toLowerCase()) {
+          setIsAdmin(true)
+        }
+      })
+      .catch(() => {})
+
     Promise.all([
-      fetch('/api/users').then(r => r.json()),
       fetch('/api/brief').then(r => r.json()),
       fetch('/api/articles').then(r => r.json()),
-    ]).then(([users, brief, arts]) => {
-      const me = users.find((u: any) => u.email === user.primaryEmailAddress?.emailAddress)
-      if (me?.role === 'admin') setIsAdmin(true)
-      setBriefItems(brief || [])
-      setArticles(arts || [])
+    ]).then(([brief, arts]) => {
+      setBriefItems(Array.isArray(brief) ? brief : [])
+      setArticles(Array.isArray(arts) ? arts : [])
       setLoading(false)
     }).catch(() => setLoading(false))
   }, [isLoaded, user])

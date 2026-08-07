@@ -20,15 +20,23 @@ export default function UsersPage() {
   useEffect(() => {
     if (!isLoaded) return
     if (!user) { setLoading(false); return }
-    fetch('/api/users')
+
+    // Check admin via server-side API (reads ADMIN_EMAIL env var)
+    fetch('/api/check-admin')
       .then(r => r.json())
-      .then((data) => {
-        setUsers(data || [])
-        const me = data.find((u: AppUser) => u.email === user.primaryEmailAddress?.emailAddress)
-        if (me?.role === 'admin') setIsAdmin(true)
+      .then(({ adminEmail }) => {
+        const userEmail = user.primaryEmailAddress?.emailAddress || ''
+        if (userEmail.toLowerCase() === (adminEmail || '').toLowerCase()) {
+          setIsAdmin(true)
+        }
         setLoading(false)
       })
       .catch(() => setLoading(false))
+
+    fetch('/api/users')
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setUsers(data) })
+      .catch(() => {})
   }, [isLoaded, user])
 
   const createUser = async () => {
