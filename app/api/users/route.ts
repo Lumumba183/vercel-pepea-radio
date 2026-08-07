@@ -15,34 +15,46 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const { data, error } = await supabaseAdmin
-    .from('app_users')
-    .insert(body)
-    .select()
-    .single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data, { status: 201 })
+  try {
+    const body = await req.json()
+    const { data, error } = await supabaseAdmin
+      .from('app_users')
+      .insert(body)
+      .select()
+      .single()
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data, { status: 201 })
+  } catch {
+    return NextResponse.json({ error: 'Database not configured. Please run the SQL schema in Supabase first.' }, { status: 500 })
+  }
 }
 
 export async function PUT(req: NextRequest) {
-  const body = await req.json()
-  const { id, ...update } = body
-  const { data, error } = await supabaseAdmin
-    .from('app_users')
-    .update(update)
-    .eq('id', id)
-    .select()
-    .single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  try {
+    const body = await req.json()
+    const { id, ...update } = body
+    const { data, error } = await supabaseAdmin
+      .from('app_users')
+      .update(update)
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data)
+  } catch {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+  }
 }
 
 export async function DELETE(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const id = searchParams.get('id')
-  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
-  const { error } = await supabaseAdmin.from('app_users').delete().eq('id', id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true })
+  try {
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get('id')
+    if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+    const { error } = await supabaseAdmin.from('app_users').delete().eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json({ error: 'Database not configured' }, { status: 500 })
+  }
 }
