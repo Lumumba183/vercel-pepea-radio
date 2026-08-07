@@ -5,13 +5,13 @@ import { Radio, MapPin, Phone, Mail, Target, Eye, Heart, Award, Users, Globe, Mu
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'About Us — Pepea Radio | Sauti Ya Afrika',
-  description: 'Learn about Pepea Radio, Kenya\\'s fastest-growing online radio station. Founded by Peter Mukabi, broadcasting since 2023 with news, music, and community stories.',
-  keywords: ['Pepea Radio', 'Kenya radio station', 'Peter Mukabi', 'TransAfrica Media', 'online radio Kenya', 'Bungoma radio'],
+  title: "About Us — Pepea Radio | Sauti Ya Afrika",
+  description: "Learn about Pepea Radio, Kenya's fastest-growing online radio station. Founded by Peter Mukabi, broadcasting since 2023 with news, music, and community stories.",
+  keywords: ["Pepea Radio", "Kenya radio station", "Peter Mukabi", "TransAfrica Media", "online radio Kenya", "Bungoma radio"],
   openGraph: {
-    title: 'About Pepea Radio — Sauti Ya Afrika',
-    description: 'Kenya\\'s premier radio station delivering news, music, and community stories.',
-    type: 'website',
+    title: "About Pepea Radio — Sauti Ya Afrika",
+    description: "Kenya's premier radio station delivering news, music, and community stories.",
+    type: "website",
   },
 }
 

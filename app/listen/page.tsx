@@ -6,11 +6,11 @@ import { supabase } from '@/lib/supabase'
 import { Play } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Listen Live — Pepea Radio | Sauti Ya Afrika',
-  description: 'Listen to Pepea Radio live online. Kenya\'s fastest-growing online radio station streaming 24/7. Music, news, sports, and community stories.',
-  keywords: ['Pepea Radio live', 'listen live Kenya', 'online radio streaming', 'Kenya radio live'],
+  title: "Listen Live — Pepea Radio | Sauti Ya Afrika",
+  description: "Listen to Pepea Radio live online. Kenya's fastest-growing online radio station streaming 24/7. Music, news, sports, and community stories.",
+  keywords: ["Pepea Radio live", "listen live Kenya", "online radio streaming", "Kenya radio live"],
   alternates: {
-    canonical: 'https://pepea-radio.vercel.app/listen',
+    canonical: "https://pepea-radio.vercel.app/listen",
   },
 }
 
