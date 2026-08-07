@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
@@ -9,6 +10,32 @@ import { notFound } from 'next/navigation'
 
 interface Props {
   params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params
+  const { data: article } = await supabase.from('articles').select('*').eq('id', id).single()
+
+  if (!article) {
+    return {
+      title: 'Article Not Found — Pepea Radio',
+    }
+  }
+
+  return {
+    title: `${article.title} — Pepea Radio`,
+    description: article.excerpt,
+    keywords: [article.category, 'Pepea Radio', 'Kenya news'],
+    alternates: {
+      canonical: `https://pepea-radio.vercel.app/article/${id}`,
+    },
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      type: 'article',
+      url: `https://pepea-radio.vercel.app/article/${id}`,
+    },
+  }
 }
 
 export default async function ArticlePage({ params }: Props) {

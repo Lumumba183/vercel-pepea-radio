@@ -1,9 +1,19 @@
+import { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
 import { supabase } from '@/lib/supabase'
 import { ScheduleItem } from '@/types'
 import { Clock } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Programme Schedule — Pepea Radio | Sauti Ya Afrika',
+  description: 'View Pepea Radio\'s full programme schedule. Morning Glory, Drive Time, Friday Jam, Gospel Hour, and more. Your favourite shows every day.',
+  keywords: ['Pepea Radio schedule', 'Kenya radio shows', 'radio programme', 'morning show Kenya'],
+  alternates: {
+    canonical: 'https://pepea-radio.vercel.app/schedule',
+  },
+}
 
 const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 

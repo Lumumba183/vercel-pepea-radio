@@ -1,7 +1,17 @@
+import { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
 import { Play, Youtube } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Pepea TV — Live Events & Video | Pepea Radio',
+  description: 'Watch Pepea TV live events, gospel shows, Friday Jam sessions, and community coverage on YouTube.',
+  keywords: ['Pepea TV', 'Kenya live events', 'YouTube Kenya', 'gospel live stream'],
+  alternates: {
+    canonical: 'https://pepea-radio.vercel.app/tv',
+  },
+}
 
 export default function TvPage() {
   return (

@@ -1,5 +1,14 @@
+import { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+
+export const metadata: Metadata = {
+  title: 'Cookie Policy — Pepea Radio',
+  description: 'Pepea Radio cookie policy. Learn how we use cookies and similar technologies on our website.',
+  alternates: {
+    canonical: 'https://pepea-radio.vercel.app/cookies',
+  },
+}
 
 export default function CookiesPage() {
   return (

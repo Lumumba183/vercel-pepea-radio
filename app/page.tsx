@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
@@ -6,6 +7,21 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Article } from '@/types'
 import { Play, Newspaper, Tv, Calendar, Megaphone, FileText } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Pepea Radio — Sauti Ya Afrika | Kenya\'s Premier Online Radio Station',
+  description: 'Listen to Pepea Radio live — Kenya\'s fastest-growing online radio station. Breaking news, sports, politics, music, and community stories. Tune in anywhere, anytime.',
+  keywords: ['Pepea Radio', 'Kenya radio live', 'online radio streaming', 'African music', 'Kenya news', 'live radio Kenya'],
+  alternates: {
+    canonical: 'https://pepea-radio.vercel.app',
+  },
+  openGraph: {
+    title: 'Pepea Radio — Sauti Ya Afrika',
+    description: 'Kenya\'s fastest-growing online radio station. Live streaming, news, sports, and community stories.',
+    type: 'website',
+    url: 'https://pepea-radio.vercel.app',
+  },
+}
 
 async function getArticles(): Promise<Article[]> {
   const { data } = await supabase

@@ -1,7 +1,17 @@
+import { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
 import { Check } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Advertise With Us — Pepea Radio | Sauti Ya Afrika',
+  description: 'Advertise with Pepea Radio and reach thousands of engaged listeners across Kenya and the diaspora. Starter, Professional, and Enterprise packages available.',
+  keywords: ['radio advertising Kenya', 'Pepea Radio ads', 'advertise Kenya radio', 'digital marketing Kenya'],
+  alternates: {
+    canonical: 'https://pepea-radio.vercel.app/advertise',
+  },
+}
 
 export default function AdvertisePage() {
   return (

@@ -1,5 +1,14 @@
+import { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+
+export const metadata: Metadata = {
+  title: 'Terms of Service — Pepea Radio',
+  description: 'Pepea Radio terms of service. Read our terms and conditions for using our website and services.',
+  alternates: {
+    canonical: 'https://pepea-radio.vercel.app/terms',
+  },
+}
 
 export default function TermsPage() {
   return (

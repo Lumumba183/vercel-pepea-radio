@@ -1,8 +1,18 @@
+import { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
 import { supabase } from '@/lib/supabase'
 import { Play } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Listen Live — Pepea Radio | Sauti Ya Afrika',
+  description: 'Listen to Pepea Radio live online. Kenya\'s fastest-growing online radio station streaming 24/7. Music, news, sports, and community stories.',
+  keywords: ['Pepea Radio live', 'listen live Kenya', 'online radio streaming', 'Kenya radio live'],
+  alternates: {
+    canonical: 'https://pepea-radio.vercel.app/listen',
+  },
+}
 
 export default async function ListenPage() {
   const { data: settings } = await supabase.from('settings').select('*').eq('id', 1).single()
