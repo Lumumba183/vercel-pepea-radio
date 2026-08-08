@@ -73,8 +73,8 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="flex justify-center">
-            <div className="w-[320px] h-[320px] rounded-full bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center animate-[float_6s_ease-in-out_infinite] shadow-[0_20px_60px_rgba(37,99,235,0.3),0_20px_60px_rgba(220,38,38,0.2)]">
-              <span className="text-8xl font-black text-white drop-shadow-lg">PR</span>
+            <div className="w-[320px] h-[320px] rounded-full bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center animate-[float_6s_ease-in-out_infinite] shadow-[0_20px_60px_rgba(37,99,235,0.3),0_20px_60px_rgba(220,38,38,0.2)] overflow-hidden">
+              <img src="/logo-pepea-radio.jpg" alt="Pepea Radio" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
