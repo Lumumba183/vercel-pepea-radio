@@ -7,10 +7,14 @@ export async function GET() {
       .from('articles')
       .select('*')
       .order('created_at', { ascending: false })
-    if (error) return NextResponse.json([])
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json({ error: error.message, hint: error.hint, code: error.code }, { status: 500 })
+    }
     return NextResponse.json(data || [])
-  } catch {
-    return NextResponse.json([])
+  } catch (err: any) {
+    console.error('Catch error:', err)
+    return NextResponse.json({ error: err?.message || 'Unknown error' }, { status: 500 })
   }
 }
 
