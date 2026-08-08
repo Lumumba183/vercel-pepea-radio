@@ -8,6 +8,7 @@ export interface Article {
   read_time: string
   featured: boolean
   content: string
+  image_url?: string
   created_at?: string
 }
 
