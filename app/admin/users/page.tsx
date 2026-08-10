@@ -31,7 +31,6 @@ export default function UsersPage() {
     full_name: '',
     role: 'editor' as 'admin' | 'editor' | 'user',
     allowed_areas: ['articles'] as string[],
-    password: '',
   })
 
   useEffect(() => {
@@ -93,7 +92,7 @@ export default function UsersPage() {
       }
       setShowForm(false)
       setCreatedUser(data.temp_password ? { email: data.email, temp_password: data.temp_password } : null)
-      setForm({ email: '', full_name: '', role: 'editor', allowed_areas: ['articles'], password: '' })
+      setForm({ email: '', full_name: '', role: 'editor', allowed_areas: ['articles'] })
       await loadUsers()
     } catch (err: any) {
       alert('Network Error: ' + err.message)
@@ -168,7 +167,7 @@ export default function UsersPage() {
             <button onClick={loadUsers} className="px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-sm font-medium cursor-pointer hover:bg-[var(--card-hover)] transition-all flex items-center gap-2">
               <RefreshCw size={14} /> Sync
             </button>
-            <button onClick={() => { setShowForm(true); setEditingUser(null); setForm({ email: '', full_name: '', role: 'editor', allowed_areas: ['articles'], password: '' }) }} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium cursor-pointer hover:bg-blue-700 transition-all flex items-center gap-2">
+            <button onClick={() => { setShowForm(true); setEditingUser(null); setForm({ email: '', full_name: '', role: 'editor', allowed_areas: ['articles'] }) }} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium cursor-pointer hover:bg-blue-700 transition-all flex items-center gap-2">
               <UserPlus size={16} /> Add User
             </button>
           </div>
@@ -196,8 +195,7 @@ export default function UsersPage() {
               </div>
             </div>
             <div className="mb-4">
-              <label className="block mb-1.5 font-medium text-sm">Password (optional — leave blank for invitation)</label>
-              <input type="password" className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-[var(--text)] focus:outline-none focus:border-blue-600" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="Leave blank to send invitation email" />
+              <p className="text-sm text-[var(--text-muted)]">A secure temporary password will be auto-generated. Share it with the user after creation.</p>
             </div>
             <div className="mb-4">
               <label className="block mb-2 font-medium text-sm">Allowed Areas</label>
@@ -227,12 +225,15 @@ export default function UsersPage() {
         {createdUser && (
           <div className="bg-green-600/10 border border-green-600/30 rounded-xl p-6 mb-6">
             <h3 className="text-lg font-bold text-green-600 mb-2">✅ User Created Successfully!</h3>
-            <p className="text-[var(--text-muted)] mb-4">Share these login details with the new user:</p>
+            <p className="text-[var(--text-muted)] mb-4">Copy and share these login details with the new user:</p>
             <div className="bg-[var(--bg)] rounded-lg p-4 space-y-2 font-mono text-sm">
-              <div><strong>Email:</strong> {createdUser.email}</div>
-              <div><strong>Temporary Password:</strong> <span className="text-red-500 font-bold select-all">{createdUser.temp_password}</span></div>
+              <div className="flex justify-between"><span>Email:</span> <strong>{createdUser.email}</strong></div>
+              <div className="flex justify-between items-center">
+                <span>Password:</span>
+                <strong className="text-red-500 select-all bg-red-500/10 px-2 py-1 rounded">{createdUser.temp_password}</strong>
+              </div>
             </div>
-            <p className="text-xs text-[var(--text-muted)] mt-2">The user should change this password after first login.</p>
+            <p className="text-xs text-[var(--text-muted)] mt-2">⚠️ The user should change this password after first login.</p>
             <button onClick={() => setCreatedUser(null)} className="mt-4 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium cursor-pointer hover:bg-green-700 transition-all">Dismiss</button>
           </div>
         )}

@@ -64,8 +64,9 @@ export async function POST(req: NextRequest) {
     const firstName = nameParts[0] || ''
     const lastName = nameParts.slice(1).join(' ') || ''
 
-    // Generate secure temp password if none provided
-    const tempPassword = password?.trim() || `Pepea@${Math.random().toString(36).slice(2, 10)}${Math.floor(Math.random() * 999)}!`
+    // ALWAYS generate a secure temp password - never accept user-provided passwords
+    // This prevents weak password rejections from Clerk
+    const tempPassword = `Pepea@${Math.random().toString(36).slice(2, 8)}${Math.floor(Math.random() * 9999)}!X7`
 
     // Create user in Clerk
     let clerkUser
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ...appUser,
       clerk_id: clerkUser.id,
-      temp_password: password?.trim() ? undefined : tempPassword,
+      temp_password: tempPassword,
     }, { status: 201 })
   } catch (err: any) {
     console.error('Create user error:', err)
