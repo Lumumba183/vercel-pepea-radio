@@ -1,4 +1,3 @@
-import { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
@@ -6,35 +5,23 @@ import BriefSlider from '@/components/BriefSlider'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Article } from '@/types'
-import { Play, Newspaper, Tv, Calendar, Megaphone, FileText } from 'lucide-react'
-
-export const metadata: Metadata = {
-  title: "Pepea Radio — Sauti Ya Afrika | Kenya's Premier Online Radio Station",
-  description: "Listen to Pepea Radio live — Kenya's fastest-growing online radio station. Breaking news, sports, politics, music, and community stories. Tune in anywhere, anytime.",
-  keywords: ["Pepea Radio", "Kenya radio live", "online radio streaming", "African music", "Kenya news", "live radio Kenya"],
-  alternates: {
-    canonical: "https://pepea-radio.vercel.app",
-  },
-  openGraph: {
-    title: "Pepea Radio — Sauti Ya Afrika",
-    description: "Kenya's fastest-growing online radio station. Live streaming, news, sports, and community stories.",
-    type: "website",
-    url: "https://pepea-radio.vercel.app",
-  },
-}
+import { Play, Newspaper, Tv, FileText, Clock, User } from 'lucide-react'
 
 async function getArticles(): Promise<Article[]> {
   const { data } = await supabase
     .from('articles')
     .select('*')
-    .eq('featured', true)
     .order('created_at', { ascending: false })
-    .limit(6)
+    .limit(10)
   return data || []
 }
 
 export default async function HomePage() {
   const articles = await getArticles()
+
+  const mainNews = articles.find(a => a.is_main_news) || articles[0]
+  const featuredArticles = articles.filter(a => a.featured && a.id !== mainNews?.id).slice(0, 6)
+  const sideArticles = articles.filter(a => a.id !== mainNews?.id).slice(0, 4)
 
   return (
     <>
@@ -45,54 +32,98 @@ export default async function HomePage() {
         <BriefSlider />
       </div>
 
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-[var(--bg)] via-[#0f172a] to-[var(--bg-light)] relative overflow-hidden px-6 py-16 min-h-[500px] flex items-center">
-        <div className="absolute inset-0 opacity-50" style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232563eb' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"}} />
-        <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-          <div className="text-center lg:text-left">
-            <div className="inline-flex items-center gap-1.5 bg-[rgba(220,38,38,0.15)] text-red-600 px-3 py-1.5 rounded-full text-xs font-bold uppercase border border-[rgba(220,38,38,0.3)] animate-[pulse-red_2s_infinite] mb-4">
-              <span className="w-1.5 h-1.5 bg-red-600 rounded-full inline-block" />
-              Live Now
+      {/* Hero / Main News Section */}
+      <section className="max-w-[1400px] mx-auto px-6 py-8">
+        {mainNews && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+            {/* Main News - Large */}
+            <div className="lg:col-span-2">
+              <Link href={`/article/${mainNews.id}`} className="group block no-underline">
+                <div className="relative rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--card)]">
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    {mainNews.image_url ? (
+                      <img
+                        src={mainNews.image_url}
+                        alt={mainNews.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)] flex items-center justify-center">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)]">
+                          <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                        </svg>
+                      </div>
+                    )}
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase flex items-center gap-1">
+                        <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                        MAIN NEWS
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <span className="inline-block bg-blue-600/15 text-blue-600 px-3 py-1 rounded-full text-xs font-bold uppercase mb-3">
+                      {mainNews.category}
+                    </span>
+                    <h2 className="text-2xl lg:text-3xl font-black text-[var(--text)] leading-tight mb-3 group-hover:text-blue-400 transition-colors">
+                      {mainNews.title}
+                    </h2>
+                    <p className="text-[var(--text-muted)] text-[0.9375rem] leading-relaxed mb-4">
+                      {mainNews.excerpt}
+                    </p>
+                    <div className="flex items-center gap-4 text-[var(--text-muted)] text-sm">
+                      <span className="flex items-center gap-1"><User size={14} /> {mainNews.author}</span>
+                      <span className="flex items-center gap-1"><Clock size={14} /> {mainNews.read_time}</span>
+                      <span>{new Date(mainNews.date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
             </div>
-            <h2 className="text-4xl lg:text-[3.5rem] font-black leading-tight mb-4 bg-gradient-to-br from-white to-[var(--text-muted)] bg-clip-text text-transparent">
-              The Voice of Kenya, Amplified
-            </h2>
-            <p className="text-lg text-[var(--text-muted)] mb-8 max-w-[500px] mx-auto lg:mx-0">
-              Pepea Radio brings you breaking news, live events, sports coverage, and the music that moves East Africa. Tune in anywhere, anytime.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-              <Link href="/listen" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-[0.9375rem] bg-gradient-to-br from-red-600 to-red-800 text-white no-underline shadow-[0_4px_15px_rgba(220,38,38,0.3)] hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(220,38,38,0.4)] transition-all">
-                <Play size={18} /> Listen Live
-              </Link>
-              <Link href="/news" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-[0.9375rem] bg-[var(--card)] text-[var(--text)] border border-[var(--border)] no-underline hover:bg-[var(--card-hover)] hover:border-blue-600 transition-all">
-                <Newspaper size={18} /> Latest News
-              </Link>
-              <Link href="/tv" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-[0.9375rem] bg-gradient-to-br from-gold to-amber-600 text-black no-underline hover:-translate-y-0.5 transition-all">
-                <Tv size={18} /> Pepea TV
-              </Link>
+
+            {/* Side News - Smaller stacked */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-[var(--text-muted)] uppercase tracking-wide">More News</h3>
+              {sideArticles.map(article => (
+                <Link key={article.id} href={`/article/${article.id}`} className="group flex gap-4 no-underline bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 hover:border-blue-600 transition-all">
+                  <div className="w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)]">
+                    {article.image_url ? (
+                      <img src={article.image_url} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)]">
+                          <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-bold text-blue-600 uppercase">{article.category}</span>
+                    <h4 className="font-bold text-[var(--text)] text-sm leading-snug mt-1 group-hover:text-blue-400 transition-colors line-clamp-2">
+                      {article.title}
+                    </h4>
+                    <p className="text-[var(--text-muted)] text-xs mt-1">{article.author}</p>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
-          <div className="flex justify-center">
-            <div className="w-[320px] h-[320px] rounded-full bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center animate-[float_6s_ease-in-out_infinite] shadow-[0_20px_60px_rgba(37,99,235,0.3),0_20px_60px_rgba(220,38,38,0.2)] overflow-hidden">
-              <img src="/logo-pepea-radio.jpg" alt="Pepea Radio" className="w-full h-full object-cover" />
-            </div>
-          </div>
-        </div>
+        )}
       </section>
 
-      {/* Latest News */}
-      <section className="max-w-[1400px] mx-auto px-6 py-16">
+      {/* Featured News */}
+      <section className="max-w-[1400px] mx-auto px-6 py-8">
         <div className="flex justify-between items-end mb-8 flex-wrap gap-4">
           <div>
-            <h2 className="text-3xl font-extrabold bg-gradient-to-r from-white to-[var(--text-muted)] bg-clip-text text-transparent">Latest News</h2>
-            <p className="text-[var(--text-muted)] text-[0.9375rem]">Breaking stories from across Kenya and the world</p>
+            <h2 className="text-3xl font-extrabold bg-gradient-to-r from-white to-[var(--text-muted)] bg-clip-text text-transparent">Featured Stories</h2>
+            <p className="text-[var(--text-muted)] text-[0.9375rem]">Top stories from across Kenya and the world</p>
           </div>
           <Link href="/news" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-[var(--card)] text-[var(--text)] border border-[var(--border)] no-underline hover:bg-[var(--card-hover)] hover:border-blue-600 transition-all">
             View All →
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {articles.map((article) => (
+          {featuredArticles.map((article) => (
             <ArticleCard key={article.id} article={article} />
           ))}
         </div>
@@ -147,20 +178,17 @@ export default async function HomePage() {
 function ArticleCard({ article }: { article: Article }) {
   return (
     <Link href={`/article/${article.id}`} className="bg-[var(--card)] rounded-xl overflow-hidden border border-[var(--border)] transition-all hover:-translate-y-1 hover:border-blue-600 hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)] no-underline block">
-      <div className="w-full h-[180px] bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)] flex items-center justify-center relative overflow-hidden">
-        <span className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase z-10">{article.category}</span>
+      <div className="w-full h-[180px] relative overflow-hidden">
         {article.image_url ? (
-          <img 
-            src={article.image_url} 
-            alt={article.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+          <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
         ) : (
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)]">
-            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
-          </svg>
+          <div className="w-full h-full bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)] flex items-center justify-center">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)]">
+              <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+            </svg>
+          </div>
         )}
+        <span className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase">{article.category}</span>
       </div>
       <div className="p-5">
         <h3 className="text-lg font-bold mb-2 text-[var(--text)] leading-snug">{article.title}</h3>

@@ -1,15 +1,5 @@
-import { Metadata } from 'next'
 import { SignIn } from '@clerk/nextjs'
 import Header from '@/components/Header'
-
-export const metadata: Metadata = {
-  title: 'Sign In — Pepea Radio | Staff Portal',
-  description: 'Sign in to the Pepea Radio admin portal. Staff and contributors only.',
-  robots: {
-    index: false,
-    follow: false,
-  },
-}
 
 export default function SignInPage() {
   return (

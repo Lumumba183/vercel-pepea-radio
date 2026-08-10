@@ -54,7 +54,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="max-w-[1400px] mx-auto border-t border-[var(--border)] pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p className="text-[var(--text-muted)] text-sm">Powered by NexaFlow Digital | +254 106 216 699 | info@pepea.radio</p>
+        <p className="text-[var(--text-muted)] text-sm">Powered by NexaFlow Digital | +254 106 216 699 | support@wedialai.com</p>
         <div className="inline-flex items-center gap-1.5 bg-[rgba(220,38,38,0.15)] text-red-600 px-3 py-1.5 rounded-full text-xs font-bold uppercase border border-[rgba(220,38,38,0.3)] animate-[pulse-red_2s_infinite]">
           <span className="w-1.5 h-1.5 bg-red-600 rounded-full inline-block" />
           On Air 24/7

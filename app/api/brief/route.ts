@@ -2,18 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
 
 export async function GET() {
-  try {
-    const { data: briefItems, error: briefError } = await supabase
-      .from('brief_items')
-      .select('*, articles(*)')
-      .order('position', { ascending: true })
-    if (briefError) {
-      return NextResponse.json([])
-    }
-    return NextResponse.json(briefItems || [])
-  } catch {
-    return NextResponse.json([])
-  }
+  const { data: briefItems, error: briefError } = await supabase
+    .from('brief_items')
+    .select('*, articles(*)')
+    .order('position', { ascending: true })
+  if (briefError) return NextResponse.json({ error: briefError.message }, { status: 500 })
+  return NextResponse.json(briefItems)
 }
 
 export async function POST(req: NextRequest) {

@@ -2,20 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
 
 export async function GET() {
-  try {
-    const { data, error } = await supabase
-      .from('articles')
-      .select('*')
-      .order('created_at', { ascending: false })
-    if (error) {
-      console.error('Supabase error:', error)
-      return NextResponse.json({ error: error.message, hint: error.hint, code: error.code }, { status: 500 })
-    }
-    return NextResponse.json(data || [])
-  } catch (err: any) {
-    console.error('Catch error:', err)
-    return NextResponse.json({ error: err?.message || 'Unknown error' }, { status: 500 })
-  }
+  const { data, error } = await supabase
+    .from('articles')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data)
 }
 
 export async function POST(req: NextRequest) {
@@ -32,6 +24,15 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const body = await req.json()
   const { id, ...update } = body
+
+  // If setting as main news, unset any existing main news
+  if (update.is_main_news === true) {
+    await supabaseAdmin
+      .from('articles')
+      .update({ is_main_news: false })
+      .eq('is_main_news', true)
+  }
+
   const { data, error } = await supabaseAdmin
     .from('articles')
     .update(update)

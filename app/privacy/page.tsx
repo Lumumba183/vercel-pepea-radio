@@ -1,14 +1,5 @@
-import { Metadata } from 'next'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-
-export const metadata: Metadata = {
-  title: 'Privacy Policy — Pepea Radio',
-  description: 'Pepea Radio privacy policy. Learn how we collect, use, and protect your personal information.',
-  alternates: {
-    canonical: 'https://pepea-radio.vercel.app/privacy',
-  },
-}
 
 export default function PrivacyPage() {
   return (

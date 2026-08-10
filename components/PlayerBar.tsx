@@ -49,8 +49,8 @@ export default function PlayerBar() {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[rgba(17,24,39,0.98)] backdrop-blur-[20px] border-t border-[var(--border)] z-[1001] px-6 py-3 flex items-center justify-between gap-4">
       <div className="flex items-center gap-4 flex-1 min-w-0">
-        <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center shrink-0 overflow-hidden">
-          <img src="/logo-pepea-radio.jpg" alt="Pepea Radio" className="w-full h-full object-cover" />
+        <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center font-black text-white text-xl shrink-0">
+          PR
         </div>
         <div className="min-w-0">
           <h4 className="text-[0.9375rem] font-semibold text-[var(--text)] truncate">Pepea Radio Live</h4>

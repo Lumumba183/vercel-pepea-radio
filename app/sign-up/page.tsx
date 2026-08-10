@@ -1,15 +1,5 @@
-import { Metadata } from 'next'
 import { SignUp } from '@clerk/nextjs'
 import Header from '@/components/Header'
-
-export const metadata: Metadata = {
-  title: 'Sign Up — Pepea Radio | Staff Portal',
-  description: 'Create an account on Pepea Radio. Staff and contributors only.',
-  robots: {
-    index: false,
-    follow: false,
-  },
-}
 
 export default function SignUpPage() {
   return (
