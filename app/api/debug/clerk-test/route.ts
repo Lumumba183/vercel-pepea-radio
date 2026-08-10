@@ -1,66 +1,42 @@
 import { NextResponse } from 'next/server'
 import { clerkClient } from '@clerk/nextjs/server'
 
-// This endpoint tests different Clerk createUser parameter combinations
-// to find which one works
 export async function GET() {
   const results: any[] = []
-  const testEmail = `test-${Date.now()}@example.com`
   const testPassword = `Test@${Math.random().toString(36).slice(2, 10)}!X9`
 
   const client = await clerkClient()
 
-  // Test 1: Minimal - just email + password
+  // Test 1: With all required fields (username, firstName, lastName)
+  const email1 = `test-${Date.now()}@example.com`
+  const username1 = `user${Date.now()}`
   try {
     const user = await client.users.createUser({
-      emailAddress: [testEmail],
-      password: testPassword,
-    })
-    results.push({ test: 'minimal_email_password', success: true, userId: user.id })
-    // Clean up
-    await client.users.deleteUser(user.id)
-  } catch (err: any) {
-    results.push({ test: 'minimal_email_password', success: false, error: err.message, errors: err.errors })
-  }
-
-  // Test 2: With firstName only
-  try {
-    const user = await client.users.createUser({
-      emailAddress: [`test2-${Date.now()}@example.com`],
-      password: testPassword,
-      firstName: 'Test',
-    })
-    results.push({ test: 'with_firstName', success: true, userId: user.id })
-    await client.users.deleteUser(user.id)
-  } catch (err: any) {
-    results.push({ test: 'with_firstName', success: false, error: err.message, errors: err.errors })
-  }
-
-  // Test 3: With firstName + lastName
-  try {
-    const user = await client.users.createUser({
-      emailAddress: [`test3-${Date.now()}@example.com`],
+      emailAddress: [email1],
+      username: username1,
       password: testPassword,
       firstName: 'Test',
       lastName: 'User',
     })
-    results.push({ test: 'with_firstName_lastName', success: true, userId: user.id })
+    results.push({ test: 'all_required_fields', success: true, userId: user.id, email: email1 })
     await client.users.deleteUser(user.id)
   } catch (err: any) {
-    results.push({ test: 'with_firstName_lastName', success: false, error: err.message, errors: err.errors })
+    results.push({ test: 'all_required_fields', success: false, error: err.message, errors: err.errors })
   }
 
-  // Test 4: Using emailAddresses (plural) instead of emailAddress
+  // Test 2: With username but empty lastName (should fail)
+  const email2 = `test2-${Date.now()}@example.com`
   try {
     const user = await client.users.createUser({
-      emailAddresses: [`test4-${Date.now()}@example.com`],
+      emailAddress: [email2],
+      username: `user2${Date.now()}`,
       password: testPassword,
       firstName: 'Test',
     } as any)
-    results.push({ test: 'emailAddresses_plural', success: true, userId: user.id })
+    results.push({ test: 'missing_lastName', success: true, userId: user.id })
     await client.users.deleteUser(user.id)
   } catch (err: any) {
-    results.push({ test: 'emailAddresses_plural', success: false, error: err.message, errors: err.errors })
+    results.push({ test: 'missing_lastName', success: false, error: err.message, errors: err.errors })
   }
 
   return NextResponse.json({
