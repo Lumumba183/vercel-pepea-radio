@@ -48,19 +48,26 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { email, full_name, role, allowed_areas, password } = body
 
+    if (!email || !full_name) {
+      return NextResponse.json({ error: 'Email and full name are required' }, { status: 400 })
+    }
+
     // Split full name
     const nameParts = full_name.trim().split(' ')
     const firstName = nameParts[0] || ''
     const lastName = nameParts.slice(1).join(' ') || ''
 
+    // Generate a secure temp password if none provided
+    const tempPassword = password || `Pepea@${Math.random().toString(36).slice(2, 10)}${Math.floor(Math.random() * 999)}!`
+
     const client = await clerkClient()
+
     // Create user in Clerk
     const clerkUser = await client.users.createUser({
       emailAddress: [email],
       firstName,
       lastName,
-      password: password || undefined,
-      skipPasswordChecks: !password,
+      password: tempPassword,
     })
 
     // Add to app_users table for role management
@@ -70,7 +77,7 @@ export async function POST(req: NextRequest) {
         id: clerkUser.id,
         email,
         full_name,
-        role,
+        role: role || 'editor',
         allowed_areas: allowed_areas || [],
       })
       .select()
@@ -78,12 +85,17 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       // Rollback: delete Clerk user if Supabase insert fails
-      await client.users.deleteUser(clerkUser.id)
+      try { await client.users.deleteUser(clerkUser.id) } catch (e) {}
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ ...appUser, clerk_id: clerkUser.id }, { status: 201 })
+    return NextResponse.json({
+      ...appUser,
+      clerk_id: clerkUser.id,
+      temp_password: password ? undefined : tempPassword, // Only return if we generated one
+    }, { status: 201 })
   } catch (err: any) {
+    console.error('Create user error:', err)
     return NextResponse.json({ error: err.message || 'Failed to create user' }, { status: 500 })
   }
 }

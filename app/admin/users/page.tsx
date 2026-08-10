@@ -54,19 +54,41 @@ export default function UsersPage() {
     }
   }
 
+  const [createdUser, setCreatedUser] = useState<{email: string, temp_password?: string} | null>(null)
+
+  useEffect(() => {
+    if (!isLoaded) return
+    if (!user) { setLoading(false); return }
+    loadUsers()
+  }, [isLoaded, user])
+
+  const validateForm = () => {
+    if (!form.email.trim()) return 'Email is required'
+    if (!form.email.includes('@')) return 'Please enter a valid email'
+    if (!form.full_name.trim()) return 'Full name is required'
+    return null
+  }
+
   const createUser = async () => {
+    const error = validateForm()
+    if (error) {
+      alert('Error: ' + error)
+      return
+    }
+
     try {
       const res = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
+      const data = await res.json()
       if (!res.ok) {
-        const err = await res.json()
-        alert('Error: ' + (err.error || 'Failed to create user'))
+        alert('Error: ' + (data.error || 'Failed to create user'))
         return
       }
       setShowForm(false)
+      setCreatedUser(data.temp_password ? { email: data.email, temp_password: data.temp_password } : null)
       setForm({ email: '', full_name: '', role: 'editor', allowed_areas: ['articles'], password: '' })
       await loadUsers()
     } catch (err: any) {
@@ -195,6 +217,19 @@ export default function UsersPage() {
               <button onClick={createUser} className="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-semibold cursor-pointer hover:bg-blue-700 transition-all">Create User</button>
               <button onClick={() => setShowForm(false)} className="px-6 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] font-semibold cursor-pointer hover:bg-[var(--card-hover)] transition-all">Cancel</button>
             </div>
+          </div>
+        )}
+
+        {createdUser && (
+          <div className="bg-green-600/10 border border-green-600/30 rounded-xl p-6 mb-6">
+            <h3 className="text-lg font-bold text-green-600 mb-2">✅ User Created Successfully!</h3>
+            <p className="text-[var(--text-muted)] mb-4">Share these login details with the new user:</p>
+            <div className="bg-[var(--bg)] rounded-lg p-4 space-y-2 font-mono text-sm">
+              <div><strong>Email:</strong> {createdUser.email}</div>
+              <div><strong>Temporary Password:</strong> <span className="text-red-500 font-bold select-all">{createdUser.temp_password}</span></div>
+            </div>
+            <p className="text-xs text-[var(--text-muted)] mt-2">The user should change this password after first login.</p>
+            <button onClick={() => setCreatedUser(null)} className="mt-4 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium cursor-pointer hover:bg-green-700 transition-all">Dismiss</button>
           </div>
         )}
 
