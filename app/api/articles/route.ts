@@ -24,6 +24,15 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const body = await req.json()
   const { id, ...update } = body
+
+  // If setting as main news, unset any existing main news
+  if (update.is_main_news === true) {
+    await supabaseAdmin
+      .from('articles')
+      .update({ is_main_news: false })
+      .eq('is_main_news', true)
+  }
+
   const { data, error } = await supabaseAdmin
     .from('articles')
     .update(update)

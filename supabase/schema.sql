@@ -1,4 +1,4 @@
--- Pepea Radio - Supabase Database Schema
+-- Pepea Radio - Supabase Database Schema (UPDATED)
 -- Run this in the Supabase SQL Editor
 
 -- Articles table
@@ -11,7 +11,9 @@ CREATE TABLE IF NOT EXISTS articles (
   date DATE NOT NULL DEFAULT CURRENT_DATE,
   read_time TEXT NOT NULL DEFAULT '5 min read',
   featured BOOLEAN NOT NULL DEFAULT false,
+  is_main_news BOOLEAN NOT NULL DEFAULT false,
   content TEXT NOT NULL DEFAULT '',
+  image_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -44,6 +46,8 @@ CREATE TABLE IF NOT EXISTS settings (
   id INTEGER PRIMARY KEY DEFAULT 1,
   stream_url TEXT NOT NULL DEFAULT 'https://stream.zeno.fm/placeholder',
   youtube_channel_id TEXT NOT NULL DEFAULT '',
+  twitch_channel TEXT NOT NULL DEFAULT '',
+  live_source TEXT NOT NULL DEFAULT 'youtube' CHECK (live_source IN ('youtube', 'twitch')),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -68,6 +72,16 @@ CREATE TABLE IF NOT EXISTS brief_items (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Page views / analytics table
+CREATE TABLE IF NOT EXISTS page_views (
+  id SERIAL PRIMARY KEY,
+  session_id TEXT NOT NULL,
+  page TEXT NOT NULL DEFAULT '/',
+  ip_hash TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Enable Row Level Security
 ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE schedule ENABLE ROW LEVEL SECURITY;
@@ -75,8 +89,9 @@ ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE app_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brief_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE page_views ENABLE ROW LEVEL SECURITY;
 
--- Allow public read access to articles, schedule, brief_items
+-- Allow public read access to articles, schedule, brief_items, settings
 CREATE POLICY "Public read articles" ON articles FOR SELECT USING (true);
 CREATE POLICY "Public read schedule" ON schedule FOR SELECT USING (true);
 CREATE POLICY "Public read brief_items" ON brief_items FOR SELECT USING (true);
@@ -93,6 +108,7 @@ CREATE POLICY "Admin all reports" ON reports FOR ALL USING (true) WITH CHECK (tr
 CREATE POLICY "Admin all settings" ON settings FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Admin all app_users" ON app_users FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Admin all brief_items" ON brief_items FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin all page_views" ON page_views FOR ALL USING (true) WITH CHECK (true);
 
 -- Insert default schedule data
 INSERT INTO schedule (day, time, show, host, description) VALUES
@@ -125,5 +141,6 @@ INSERT INTO schedule (day, time, show, host, description) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Insert default settings
-INSERT INTO settings (id, stream_url, youtube_channel_id) VALUES (1, 'https://stream.zeno.fm/placeholder', '')
+INSERT INTO settings (id, stream_url, youtube_channel_id, twitch_channel, live_source) 
+VALUES (1, 'https://stream.zeno.fm/placeholder', '', '', 'youtube')
 ON CONFLICT (id) DO NOTHING;

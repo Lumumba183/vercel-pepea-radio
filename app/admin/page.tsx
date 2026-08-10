@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import Header from '@/components/Header'
-import { Article, Report, ScheduleItem } from '@/types'
-import { LayoutDashboard, FileText, Calendar, Inbox, Settings, Users, Newspaper, BarChart3 } from 'lucide-react'
+import { Article, Report, ScheduleItem, AnalyticsSummary } from '@/types'
+import {
+  LayoutDashboard, FileText, Calendar, Inbox, Settings, Users, Newspaper, BarChart3,
+  Image as ImageIcon, Star, TrendingUp, Eye, Users as UsersIcon, Activity
+} from 'lucide-react'
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -23,6 +26,7 @@ export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([])
   const [schedule, setSchedule] = useState<ScheduleItem[]>([])
   const [reports, setReports] = useState<Report[]>([])
+  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -43,6 +47,7 @@ export default function AdminPage() {
     fetch('/api/articles').then(r => r.json()).then(setArticles)
     fetch('/api/schedule').then(r => r.json()).then(setSchedule)
     fetch('/api/reports').then(r => r.json()).then(setReports)
+    fetch('/api/analytics').then(r => r.json()).then(setAnalytics)
   }, [isLoaded, user])
 
   if (!isLoaded || loading) {
@@ -125,7 +130,7 @@ export default function AdminPage() {
 
         {/* Main Content */}
         <main className="flex-1 lg:ml-64 p-6 lg:p-8 mt-12 lg:mt-0">
-          {activeTab === 'dashboard' && <DashboardTab articles={articles} schedule={schedule} reports={reports} />}
+          {activeTab === 'dashboard' && <DashboardTab articles={articles} schedule={schedule} reports={reports} analytics={analytics} />}
           {activeTab === 'articles' && <ArticlesTab articles={articles} onRefresh={() => fetch('/api/articles').then(r => r.json()).then(setArticles)} />}
           {activeTab === 'schedule' && <ScheduleTab schedule={schedule} onRefresh={() => fetch('/api/schedule').then(r => r.json()).then(setSchedule)} />}
           {activeTab === 'reports' && <ReportsTab reports={reports} onRefresh={() => fetch('/api/reports').then(r => r.json()).then(setReports)} />}
@@ -138,10 +143,37 @@ export default function AdminPage() {
   )
 }
 
-function DashboardTab({ articles, schedule, reports }: { articles: Article[]; schedule: ScheduleItem[]; reports: Report[] }) {
+function DashboardTab({ articles, schedule, reports, analytics }: { articles: Article[]; schedule: ScheduleItem[]; reports: Report[]; analytics: AnalyticsSummary | null }) {
   return (
     <div>
       <h2 className="text-2xl font-extrabold mb-6">Dashboard</h2>
+
+      {/* Analytics Cards */}
+      {analytics && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-xl p-6 text-center text-white">
+            <Eye size={24} className="mx-auto mb-2 opacity-80" />
+            <p className="text-3xl font-black">{analytics.live_viewers}</p>
+            <p className="text-sm opacity-80">Live Viewers</p>
+          </div>
+          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-6 text-center text-white">
+            <Activity size={24} className="mx-auto mb-2 opacity-80" />
+            <p className="text-3xl font-black">{analytics.today_views}</p>
+            <p className="text-sm opacity-80">Views Today</p>
+          </div>
+          <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl p-6 text-center text-white">
+            <TrendingUp size={24} className="mx-auto mb-2 opacity-80" />
+            <p className="text-3xl font-black">{analytics.total_views}</p>
+            <p className="text-sm opacity-80">Total Views</p>
+          </div>
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 text-center">
+            <UsersIcon size={24} className="mx-auto mb-2 text-gold" />
+            <p className="text-3xl font-black text-gold">{articles.filter(a => a.featured).length}</p>
+            <p className="text-[var(--text-muted)] text-sm">Featured</p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 text-center">
           <p className="text-4xl font-black text-blue-600">{articles.length}</p>
@@ -156,10 +188,11 @@ function DashboardTab({ articles, schedule, reports }: { articles: Article[]; sc
           <p className="text-[var(--text-muted)] text-sm">Reports</p>
         </div>
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 text-center">
-          <p className="text-4xl font-black text-success">{articles.filter(a => a.featured).length}</p>
-          <p className="text-[var(--text-muted)] text-sm">Featured</p>
+          <p className="text-4xl font-black text-success">{articles.filter(a => a.is_main_news).length}</p>
+          <p className="text-[var(--text-muted)] text-sm">Main News</p>
         </div>
       </div>
+
       <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
         <h3 className="text-lg font-bold mb-4">Quick Actions</h3>
         <div className="flex flex-wrap gap-3">
@@ -174,15 +207,41 @@ function DashboardTab({ articles, schedule, reports }: { articles: Article[]; sc
 function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: () => void }) {
   const [editing, setEditing] = useState<Article | null>(null)
   const [form, setForm] = useState<Partial<Article>>({})
+  const [uploading, setUploading] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   const openNew = () => {
-    setEditing({ id: 0, title: '', excerpt: '', category: 'National News', author: '', date: '', read_time: '5 min read', featured: false, content: '' } as Article)
+    setEditing({ id: 0, title: '', excerpt: '', category: 'National News', author: '', date: '', read_time: '5 min read', featured: false, is_main_news: false, content: '', image_url: null } as Article)
     setForm({})
+    setPreviewUrl(null)
   }
 
   const openEdit = (a: Article) => {
     setEditing(a)
     setForm(a)
+    setPreviewUrl(a.image_url || null)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    const fd = new FormData()
+    fd.append('file', file)
+
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (data.url) {
+        setForm(prev => ({ ...prev, image_url: data.url }))
+        setPreviewUrl(data.url)
+      }
+    } catch (err) {
+      alert('Upload failed')
+    } finally {
+      setUploading(false)
+    }
   }
 
   const save = async () => {
@@ -215,6 +274,21 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
               <button onClick={() => setEditing(null)} className="text-[var(--text)] text-xl cursor-pointer">✕</button>
             </div>
             <div className="space-y-4">
+              {/* Image Upload */}
+              <div>
+                <label className="block mb-1.5 font-medium text-sm">Article Image</label>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-sm cursor-pointer hover:bg-[var(--card-hover)] transition-all">
+                    <ImageIcon size={16} />
+                    {uploading ? 'Uploading...' : 'Choose Image'}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                  </label>
+                  {previewUrl && (
+                    <img src={previewUrl} alt="Preview" className="w-16 h-16 object-cover rounded-lg border border-[var(--border)]" />
+                  )}
+                </div>
+              </div>
+
               <div>
                 <label className="block mb-1.5 font-medium text-sm">Title</label>
                 <input className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-[var(--text)] focus:outline-none focus:border-blue-600" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} />
@@ -227,7 +301,7 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
                 <div>
                   <label className="block mb-1.5 font-medium text-sm">Category</label>
                   <select className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-[var(--text)] focus:outline-none focus:border-blue-600" value={form.category || 'National News'} onChange={e => setForm({ ...form, category: e.target.value })}>
-                    {['National News','County News','World News','Politics','Sports','Health','Celebrity','Swahili','Community','Opinion'].map(c => <option key={c}>{c}</option>)}
+                    {['National News','County News','World News','Politics','Sports','Health','Medical','Celebrity','Swahili','Community','Opinion'].map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
@@ -243,10 +317,18 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
                 <label className="block mb-1.5 font-medium text-sm">Content (HTML supported)</label>
                 <textarea className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-[var(--text)] focus:outline-none focus:border-blue-600 font-mono" rows={8} value={form.content || ''} onChange={e => setForm({ ...form, content: e.target.value })} placeholder="<p>Your article content here...</p>" />
               </div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-auto" checked={form.featured || false} onChange={e => setForm({ ...form, featured: e.target.checked })} />
-                <span className="text-sm">Feature on homepage</span>
-              </label>
+
+              <div className="flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="w-auto" checked={form.featured || false} onChange={e => setForm({ ...form, featured: e.target.checked })} />
+                  <span className="text-sm">Feature on homepage</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="w-auto" checked={form.is_main_news || false} onChange={e => setForm({ ...form, is_main_news: e.target.checked })} />
+                  <span className="text-sm flex items-center gap-1"><Star size={14} className="text-yellow-500" /> Set as MAIN News (hero)</span>
+                </label>
+              </div>
+
               <div className="flex gap-3">
                 <button onClick={save} className="flex-1 py-3 rounded-lg bg-blue-600 text-white font-semibold cursor-pointer hover:bg-blue-700 transition-all">Save Article</button>
                 <button onClick={() => setEditing(null)} className="flex-1 py-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] font-semibold cursor-pointer hover:bg-[var(--card-hover)] transition-all">Cancel</button>
@@ -259,16 +341,26 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
       <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
         <table className="admin-table">
           <thead>
-            <tr><th>ID</th><th>Title</th><th>Category</th><th>Author</th><th>Date</th><th>Actions</th></tr>
+            <tr><th>ID</th><th>Image</th><th>Title</th><th>Category</th><th>Main</th><th>Featured</th><th>Author</th><th>Actions</th></tr>
           </thead>
           <tbody>
             {articles.map(a => (
               <tr key={a.id}>
                 <td>{a.id}</td>
+                <td>
+                  {a.image_url ? (
+                    <img src={a.image_url} alt="" className="w-12 h-12 object-cover rounded-lg" />
+                  ) : (
+                    <div className="w-12 h-12 bg-[var(--bg)] rounded-lg flex items-center justify-center">
+                      <ImageIcon size={16} className="text-[var(--text-muted)]" />
+                    </div>
+                  )}
+                </td>
                 <td><strong>{a.title}</strong></td>
                 <td><span className="badge bg-blue-600/15 text-blue-600">{a.category}</span></td>
+                <td>{a.is_main_news ? <Star size={16} className="text-yellow-500" /> : '—'}</td>
+                <td>{a.featured ? '✓' : '—'}</td>
                 <td>{a.author}</td>
-                <td>{new Date(a.date).toLocaleDateString('en-KE')}</td>
                 <td>
                   <button onClick={() => openEdit(a)} className="px-3 py-1.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-sm cursor-pointer hover:bg-[var(--card-hover)] transition-all">Edit</button>
                   <button onClick={() => del(a.id)} className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm cursor-pointer hover:bg-red-700 transition-all ml-2">Delete</button>

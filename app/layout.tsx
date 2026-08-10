@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
+import AnalyticsTracker from '@/components/AnalyticsTracker'
 
 export const metadata: Metadata = {
   title: 'Pepea Radio — Sauti Ya Afrika',
@@ -15,7 +16,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body>{children}</body>
+        <body>
+          {children}
+          <AnalyticsTracker />
+        </body>
       </html>
     </ClerkProvider>
   )

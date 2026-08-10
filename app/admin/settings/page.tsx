@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import Header from '@/components/Header'
-import { ArrowLeft, Radio, Youtube, Save } from 'lucide-react'
+import { ArrowLeft, Radio, Youtube, Save, Twitch } from 'lucide-react'
 
 export default function SettingsPage() {
   const { user, isLoaded } = useUser()
@@ -12,6 +12,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [streamUrl, setStreamUrl] = useState('')
   const [youtubeId, setYoutubeId] = useState('')
+  const [twitchChannel, setTwitchChannel] = useState('')
+  const [liveSource, setLiveSource] = useState<'youtube' | 'twitch'>('youtube')
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -25,6 +27,8 @@ export default function SettingsPage() {
       if (me?.role === 'admin') setIsAdmin(true)
       setStreamUrl(settings?.stream_url || '')
       setYoutubeId(settings?.youtube_channel_id || '')
+      setTwitchChannel(settings?.twitch_channel || '')
+      setLiveSource(settings?.live_source || 'youtube')
       setLoading(false)
     }).catch(() => setLoading(false))
   }, [isLoaded, user])
@@ -33,7 +37,12 @@ export default function SettingsPage() {
     await fetch('/api/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stream_url: streamUrl, youtube_channel_id: youtubeId }),
+      body: JSON.stringify({
+        stream_url: streamUrl,
+        youtube_channel_id: youtubeId,
+        twitch_channel: twitchChannel,
+        live_source: liveSource,
+      }),
     })
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
@@ -84,6 +93,34 @@ export default function SettingsPage() {
             />
           </div>
 
+          {/* Live Source Toggle */}
+          <div>
+            <label className="block mb-2 font-medium">Live Video Source</label>
+            <p className="text-sm text-[var(--text-muted)] mb-3">Choose which platform to display on the TV page.</p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setLiveSource('youtube')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-all cursor-pointer ${
+                  liveSource === 'youtube'
+                    ? 'bg-red-600/15 border-red-600 text-red-600'
+                    : 'bg-[var(--bg)] border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)]'
+                }`}
+              >
+                <Youtube size={18} /> YouTube Live
+              </button>
+              <button
+                onClick={() => setLiveSource('twitch')}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-all cursor-pointer ${
+                  liveSource === 'twitch'
+                    ? 'bg-purple-600/15 border-purple-600 text-purple-600'
+                    : 'bg-[var(--bg)] border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)]'
+                }`}
+              >
+                <Twitch size={18} /> Twitch Live
+              </button>
+            </div>
+          </div>
+
           <div>
             <label className="flex items-center gap-2 mb-2 font-medium">
               <Youtube size={16} className="text-red-600" /> YouTube Channel ID
@@ -95,6 +132,20 @@ export default function SettingsPage() {
               value={youtubeId}
               onChange={e => setYoutubeId(e.target.value)}
               placeholder="UCxxxxxxxxxxxxxxxxxxx"
+            />
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 mb-2 font-medium">
+              <Twitch size={16} className="text-purple-600" /> Twitch Channel
+            </label>
+            <p className="text-sm text-[var(--text-muted)] mb-2">Your Twitch channel name (e.g., yourchannel)</p>
+            <input
+              type="text"
+              className="w-full px-4 py-3 bg-[var(--bg)] border border-[var(--border)] rounded-lg text-[var(--text)] focus:outline-none focus:border-blue-600 focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)]"
+              value={twitchChannel}
+              onChange={e => setTwitchChannel(e.target.value)}
+              placeholder="yourchannel"
             />
           </div>
 

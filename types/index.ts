@@ -7,7 +7,9 @@ export interface Article {
   date: string
   read_time: string
   featured: boolean
+  is_main_news: boolean
   content: string
+  image_url: string | null
   created_at?: string
 }
 
@@ -37,6 +39,8 @@ export interface SiteSettings {
   id: number
   stream_url: string
   youtube_channel_id: string
+  twitch_channel: string
+  live_source: 'youtube' | 'twitch'
   updated_at?: string
 }
 
@@ -57,4 +61,11 @@ export interface AppUser {
   role: 'admin' | 'editor' | 'user'
   allowed_areas: string[]
   created_at?: string
+}
+
+export interface AnalyticsSummary {
+  live_viewers: number
+  today_views: number
+  total_views: number
+  period_views: number
 }

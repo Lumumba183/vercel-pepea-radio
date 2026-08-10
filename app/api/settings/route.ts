@@ -9,7 +9,12 @@ export async function GET() {
     .single()
   if (error) {
     if (error.code === 'PGRST116') {
-      return NextResponse.json({ stream_url: 'https://stream.zeno.fm/placeholder', youtube_channel_id: '' })
+      return NextResponse.json({
+        stream_url: 'https://stream.zeno.fm/placeholder',
+        youtube_channel_id: '',
+        twitch_channel: '',
+        live_source: 'youtube',
+      })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -19,7 +24,7 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   const body = await req.json()
   const { data: existing } = await supabaseAdmin.from('settings').select('id').eq('id', 1).single()
-  
+
   if (existing) {
     const { data, error } = await supabaseAdmin
       .from('settings')

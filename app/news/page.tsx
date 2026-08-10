@@ -6,8 +6,9 @@ import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
 import Link from 'next/link'
 import { Article } from '@/types'
+import { Image as ImageIcon } from 'lucide-react'
 
-const categories = ['All', 'National News', 'County News', 'World News', 'Politics', 'Sports', 'Health', 'Celebrity', 'Swahili', 'Community', 'Opinion']
+const categories = ['All', 'National News', 'County News', 'World News', 'Politics', 'Sports', 'Health', 'Medical', 'Celebrity', 'Swahili', 'Community', 'Opinion']
 
 export default function NewsPage() {
   const [articles, setArticles] = useState<Article[]>([])
@@ -56,11 +57,15 @@ export default function NewsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map(article => (
               <Link key={article.id} href={`/article/${article.id}`} className="bg-[var(--card)] rounded-xl overflow-hidden border border-[var(--border)] transition-all hover:-translate-y-1 hover:border-blue-600 hover:shadow-[0_10px_40px_rgba(0,0,0,0.5)] no-underline block">
-                <div className="w-full h-[180px] bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)] flex items-center justify-center relative">
+                <div className="w-full h-[180px] relative overflow-hidden">
+                  {article.image_url ? (
+                    <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)] flex items-center justify-center">
+                      <ImageIcon size={32} className="text-[var(--text-muted)]" />
+                    </div>
+                  )}
                   <span className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase">{article.category}</span>
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)]">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
-                  </svg>
                 </div>
                 <div className="p-5">
                   <h3 className="text-lg font-bold mb-2 text-[var(--text)] leading-snug">{article.title}</h3>
