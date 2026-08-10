@@ -72,7 +72,7 @@ export default function UsersPage() {
   const createUser = async () => {
     const error = validateForm()
     if (error) {
-      alert('Error: ' + error)
+      alert('Validation Error: ' + error)
       return
     }
 
@@ -84,7 +84,11 @@ export default function UsersPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        alert('Error: ' + (data.error || 'Failed to create user'))
+        // Show detailed error from server
+        const statusText = res.status === 409 ? 'Email Already Exists' : 
+                          res.status === 422 ? 'Clerk Error' : 
+                          res.status === 500 ? 'Server Error' : 'Error'
+        alert(`${statusText}: ${data.error || 'Failed to create user'}`)
         return
       }
       setShowForm(false)
@@ -92,7 +96,7 @@ export default function UsersPage() {
       setForm({ email: '', full_name: '', role: 'editor', allowed_areas: ['articles'], password: '' })
       await loadUsers()
     } catch (err: any) {
-      alert('Error: ' + err.message)
+      alert('Network Error: ' + err.message)
     }
   }
 
