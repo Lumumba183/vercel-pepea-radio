@@ -36,57 +36,71 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const debugLog: any[] = []
+  
   try {
     const body = await req.json()
-    const { email, full_name, role, allowed_areas, password } = body
+    const { email, full_name, role, allowed_areas } = body
+
+    debugLog.push({ step: 'received', email, full_name, role })
 
     // Validate
     if (!email?.trim()) return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     if (!email.includes('@')) return NextResponse.json({ error: 'Invalid email format' }, { status: 400 })
     if (!full_name?.trim()) return NextResponse.json({ error: 'Full name is required' }, { status: 400 })
 
-    // Check if email already exists in Clerk
+    // Check if email already exists
     const client = await clerkClient()
     try {
       const existingUsers = await client.users.getUserList({ emailAddress: [email] })
       if (existingUsers.data.length > 0) {
         return NextResponse.json(
-          { error: `Email "${email}" already exists. Delete the existing user first or use a different email.` },
+          { error: `Email "${email}" already exists in Clerk.` },
           { status: 409 }
         )
       }
     } catch (checkErr: any) {
-      console.error('Email check error:', checkErr)
-      // Continue anyway - might be a Clerk auth issue
+      debugLog.push({ step: 'email_check_error', error: checkErr.message })
     }
 
     const nameParts = full_name.trim().split(' ')
     const firstName = nameParts[0] || ''
     const lastName = nameParts.slice(1).join(' ') || ''
 
-    // ALWAYS generate a secure temp password - never accept user-provided passwords
-    // This prevents weak password rejections from Clerk
+    // Generate password
     const tempPassword = `Pepea@${Math.random().toString(36).slice(2, 8)}${Math.floor(Math.random() * 9999)}!X7`
+    debugLog.push({ step: 'password_generated', passwordLength: tempPassword.length })
+
+    // Build Clerk payload - try minimal first
+    const clerkPayload: any = {
+      emailAddress: [email],
+      password: tempPassword,
+    }
+
+    // Only add names if they exist
+    if (firstName) clerkPayload.firstName = firstName
+    if (lastName) clerkPayload.lastName = lastName
+
+    debugLog.push({ step: 'clerk_payload', payload: clerkPayload })
 
     // Create user in Clerk
     let clerkUser
     try {
-      clerkUser = await client.users.createUser({
-        emailAddress: [email],
-        firstName: firstName || undefined,
-        lastName: lastName || undefined,
-        password: tempPassword,
-      })
+      clerkUser = await client.users.createUser(clerkPayload)
+      debugLog.push({ step: 'clerk_success', userId: clerkUser.id })
     } catch (clerkErr: any) {
-      console.error('Clerk createUser error:', clerkErr)
-      // Extract detailed error from Clerk
-      const clerkMessage = clerkErr?.errors?.[0]?.message
-        || clerkErr?.message
-        || 'Clerk user creation failed'
-      return NextResponse.json(
-        { error: `Clerk Error: ${clerkMessage}` },
-        { status: 422 }
-      )
+      debugLog.push({ 
+        step: 'clerk_error', 
+        error: clerkErr.message,
+        errors: clerkErr.errors,
+        status: clerkErr.status,
+        clerkTraceId: clerkErr.clerkTraceId,
+      })
+      
+      return NextResponse.json({
+        error: `Clerk Error: ${clerkErr.message}`,
+        debug: debugLog,
+      }, { status: 422 })
     }
 
     // Add to app_users table
@@ -103,19 +117,23 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) {
-      // Rollback: delete Clerk user if Supabase insert fails
+      debugLog.push({ step: 'supabase_error', error: error.message })
       try { await client.users.deleteUser(clerkUser.id) } catch (e) {}
-      return NextResponse.json({ error: `Database Error: ${error.message}` }, { status: 500 })
+      return NextResponse.json({ error: `Database Error: ${error.message}`, debug: debugLog }, { status: 500 })
     }
+
+    debugLog.push({ step: 'complete' })
 
     return NextResponse.json({
       ...appUser,
       clerk_id: clerkUser.id,
       temp_password: tempPassword,
+      debug: debugLog,
     }, { status: 201 })
   } catch (err: any) {
+    debugLog.push({ step: 'unexpected_error', error: err.message, stack: err.stack })
     console.error('Create user error:', err)
-    return NextResponse.json({ error: err.message || 'Failed to create user' }, { status: 500 })
+    return NextResponse.json({ error: err.message || 'Failed to create user', debug: debugLog }, { status: 500 })
   }
 }
 
