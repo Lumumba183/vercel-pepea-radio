@@ -67,21 +67,23 @@ export async function POST(req: NextRequest) {
     const firstName = nameParts[0] || ''
     const lastName = nameParts.slice(1).join(' ') || ''
 
+    // Generate username from email (required by Clerk instance settings)
+    const username = email.split('@')[0] + Math.floor(Math.random() * 999)
+    
     // Generate password
     const tempPassword = `Pepea@${Math.random().toString(36).slice(2, 8)}${Math.floor(Math.random() * 9999)}!X7`
     debugLog.push({ step: 'password_generated', passwordLength: tempPassword.length })
 
-    // Build Clerk payload - try minimal first
+    // Build Clerk payload - MUST include username, firstName, lastName
     const clerkPayload: any = {
       emailAddress: [email],
+      username: username,
       password: tempPassword,
+      firstName: firstName || 'User',
+      lastName: lastName || 'Pepea',
     }
 
-    // Only add names if they exist
-    if (firstName) clerkPayload.firstName = firstName
-    if (lastName) clerkPayload.lastName = lastName
-
-    debugLog.push({ step: 'clerk_payload', payload: clerkPayload })
+    debugLog.push({ step: 'clerk_payload', payload: { ...clerkPayload, password: '***hidden***' } })
 
     // Create user in Clerk
     let clerkUser
