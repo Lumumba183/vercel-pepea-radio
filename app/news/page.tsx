@@ -10,6 +10,16 @@ import { Image as ImageIcon } from 'lucide-react'
 
 const categories = ['All', 'National News', 'County News', 'World News', 'Politics', 'Sports', 'Health', 'Medical', 'Celebrity', 'Swahili', 'Community', 'Opinion']
 
+function formatDate(dateStr: string | undefined | null, createdAt?: string | undefined | null): string {
+  const d = dateStr || createdAt
+  if (!d) return ''
+  try {
+    return new Date(d).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })
+  } catch {
+    return ''
+  }
+}
+
 export default function NewsPage() {
   const [articles, setArticles] = useState<Article[]>([])
   const [activeCategory, setActiveCategory] = useState('All')
@@ -71,7 +81,7 @@ export default function NewsPage() {
                   <h3 className="text-lg font-bold mb-2 text-[var(--text)] leading-snug">{article.title}</h3>
                   <div className="flex gap-4 text-[var(--text-muted)] text-[0.8125rem] mb-3">
                     <span>{article.author}</span>
-                    <span>{new Date(article.date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                    <span>{formatDate(article.date, article.created_at)}</span>
                     <span>{article.read_time}</span>
                   </div>
                   <p className="text-[var(--text-muted)] text-[0.9375rem] leading-relaxed">{article.excerpt}</p>

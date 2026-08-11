@@ -53,7 +53,7 @@ export default async function ArticlePage({ params }: Props) {
             <h1 className="text-3xl lg:text-[2.5rem] font-extrabold leading-tight mb-4">{article.title}</h1>
             <div className="flex items-center gap-6 text-[var(--text-muted)] text-[0.9375rem]">
               <span className="flex items-center gap-1"><User size={14} /> {article.author}</span>
-              <span>{new Date(article.date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+              <span>{article.date ? new Date(article.date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' }) : article.created_at ? new Date(article.created_at).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}</span>
               <span className="flex items-center gap-1"><Clock size={14} /> {article.read_time}</span>
             </div>
           </div>

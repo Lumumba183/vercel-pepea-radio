@@ -9,6 +9,16 @@ import { supabase } from '@/lib/supabase'
 import { Article } from '@/types'
 import { Play, Newspaper, Tv, FileText, Clock, User } from 'lucide-react'
 
+function formatDate(dateStr: string | undefined | null, createdAt?: string | undefined | null): string {
+  const d = dateStr || createdAt
+  if (!d) return ''
+  try {
+    return new Date(d).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })
+  } catch {
+    return ''
+  }
+}
+
 async function getArticles(): Promise<Article[]> {
   const { data } = await supabase
     .from('articles')
@@ -22,8 +32,12 @@ export default async function HomePage() {
   const articles = await getArticles()
 
   const mainNews = articles.find(a => a.is_main_news) || articles[0]
+  // Featured: use explicitly featured articles, or fallback to latest 6 (excluding main)
   const featuredArticles = articles.filter(a => a.featured && a.id !== mainNews?.id).slice(0, 6)
-  const sideArticles = articles.filter(a => a.id !== mainNews?.id).slice(0, 4)
+  const effectiveFeatured = featuredArticles.length > 0 ? featuredArticles : articles.filter(a => a.id !== mainNews?.id).slice(0, 6)
+  // Side articles: exclude main news and featured (or the ones already shown)
+  const shownIds = new Set([mainNews?.id, ...effectiveFeatured.map(a => a.id)])
+  const sideArticles = articles.filter(a => !shownIds.has(a.id)).slice(0, 4)
 
   return (
     <>
@@ -76,7 +90,7 @@ export default async function HomePage() {
                     <div className="flex items-center gap-4 text-[var(--text-muted)] text-sm">
                       <span className="flex items-center gap-1"><User size={14} /> {mainNews.author}</span>
                       <span className="flex items-center gap-1"><Clock size={14} /> {mainNews.read_time}</span>
-                      <span>{new Date(mainNews.date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                      <span>{formatDate(mainNews.date, mainNews.created_at)}</span>
                     </div>
                   </div>
                 </div>
@@ -129,7 +143,7 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredArticles.map((article) => (
+          {effectiveFeatured.map((article) => (
             <ArticleCard key={article.id} article={article} />
           ))}
         </div>
@@ -199,7 +213,7 @@ function ArticleCard({ article }: { article: Article }) {
         <h3 className="text-lg font-bold mb-2 text-[var(--text)] leading-snug">{article.title}</h3>
         <div className="flex gap-4 text-[var(--text-muted)] text-[0.8125rem] mb-3">
           <span>{article.author}</span>
-          <span>{new Date(article.date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+          <span>{formatDate(article.date, article.created_at)}</span>
           <span>{article.read_time}</span>
         </div>
         <p className="text-[var(--text-muted)] text-[0.9375rem] leading-relaxed">{article.excerpt}</p>

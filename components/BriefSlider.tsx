@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Article } from '@/types'
-import { Newspaper } from 'lucide-react'
+import { Newspaper, AlertTriangle } from 'lucide-react'
 
 interface BriefItem {
   id: number
@@ -17,14 +17,101 @@ interface BriefItem {
 
 export default function BriefSlider() {
   const [items, setItems] = useState<BriefItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
+    // Try to fetch brief items first
     fetch('/api/brief')
-      .then(r => r.json())
-      .then(data => setItems(data || []))
+      .then(r => {
+        if (!r.ok) throw new Error(`Brief API error: ${r.status}`)
+        return r.json()
+      })
+      .then((data: BriefItem[]) => {
+        // If brief_items table has entries, use them
+        if (Array.isArray(data) && data.length > 0) {
+          setItems(data)
+          setLoading(false)
+          return
+        }
+        // Otherwise, auto-populate from latest articles
+        return fetch('/api/articles')
+          .then(r => r.json())
+          .then((articles: Article[]) => {
+            if (!Array.isArray(articles) || articles.length === 0) {
+              setItems([])
+              setLoading(false)
+              return
+            }
+            // Create brief items from top 5 latest articles
+            const autoItems: BriefItem[] = articles.slice(0, 5).map((article, index) => ({
+              id: -article.id, // negative to distinguish from DB items
+              article_id: article.id,
+              custom_title: null,
+              custom_excerpt: null,
+              position: index + 1,
+              is_manual: false,
+              articles: article,
+            }))
+            setItems(autoItems)
+            setLoading(false)
+          })
+      })
+      .catch(err => {
+        console.error('BriefSlider error:', err)
+        setError(err.message)
+        // Fallback: try to load from articles API
+        fetch('/api/articles')
+          .then(r => r.json())
+          .then((articles: Article[]) => {
+            if (Array.isArray(articles) && articles.length > 0) {
+              const autoItems: BriefItem[] = articles.slice(0, 5).map((article, index) => ({
+                id: -article.id,
+                article_id: article.id,
+                custom_title: null,
+                custom_excerpt: null,
+                position: index + 1,
+                is_manual: false,
+                articles: article,
+              }))
+              setItems(autoItems)
+            }
+            setLoading(false)
+          })
+          .catch(() => setLoading(false))
+      })
   }, [])
 
-  if (items.length === 0) return null
+  if (loading) {
+    return (
+      <div className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 border-b-2 border-yellow-600 py-3">
+        <div className="max-w-[1400px] mx-auto flex items-center px-6">
+          <div className="shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-black uppercase flex items-center gap-2 shadow-lg mr-4">
+            <Newspaper size={16} />
+            <span>Brief</span>
+          </div>
+          <div className="flex-1 text-black/60 text-sm font-medium">Loading latest news...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 border-b-2 border-yellow-600 py-3">
+        <div className="max-w-[1400px] mx-auto flex items-center px-6">
+          <div className="shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-black uppercase flex items-center gap-2 shadow-lg mr-4">
+            <Newspaper size={16} />
+            <span>Brief</span>
+          </div>
+          <div className="flex-1 text-black/60 text-sm font-medium flex items-center gap-2">
+            <AlertTriangle size={14} />
+            No news available. Add articles in the admin panel.
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   // Duplicate items for seamless marquee
   const marqueeItems = [...items, ...items, ...items]

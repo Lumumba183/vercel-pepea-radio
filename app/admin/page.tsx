@@ -213,7 +213,8 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   const openNew = () => {
-    setEditing({ id: 0, title: '', excerpt: '', category: 'National News', author: '', date: '', read_time: '5 min read', featured: false, is_main_news: false, content: '', image_url: null } as Article)
+    const today = new Date().toISOString().split('T')[0]
+    setEditing({ id: 0, title: '', excerpt: '', category: 'National News', author: '', date: today, read_time: '5 min read', featured: false, is_main_news: false, content: '', image_url: null } as Article)
     setForm({})
     setPreviewUrl(null)
   }
@@ -249,7 +250,11 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
   const save = async () => {
     const url = '/api/articles'
     const method = editing && editing.id > 0 ? 'PUT' : 'POST'
-    const body = editing && editing.id > 0 ? { ...form, id: editing.id } : form
+    let body = editing && editing.id > 0 ? { ...form, id: editing.id } : { ...form }
+    // Auto-set date if not provided
+    if (!body.date) {
+      body.date = new Date().toISOString().split('T')[0]
+    }
     await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     setEditing(null)
     onRefresh()
