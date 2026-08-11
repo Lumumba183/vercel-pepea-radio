@@ -211,11 +211,13 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
   const [form, setForm] = useState<Partial<Article>>({})
   const [uploading, setUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
 
   const openNew = () => {
     const today = new Date().toISOString().split('T')[0]
-    setEditing({ id: 0, title: '', excerpt: '', category: 'National News', author: '', date: today, read_time: '5 min read', featured: false, is_main_news: false, content: '', image_url: null } as Article)
-    setForm({})
+    const defaults = { id: 0, title: '', excerpt: '', category: 'National News', author: '', date: today, read_time: '5 min read', featured: false, is_main_news: false, content: '', image_url: null } as Article
+    setEditing(defaults)
+    setForm({ ...defaults })
     setPreviewUrl(null)
   }
 
@@ -248,6 +250,7 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
   }
 
   const save = async () => {
+    setSaving(true)
     const url = '/api/articles'
     const method = editing && editing.id > 0 ? 'PUT' : 'POST'
     let body = editing && editing.id > 0 ? { ...form, id: editing.id } : { ...form }
@@ -255,15 +258,39 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
     if (!body.date) {
       body.date = new Date().toISOString().split('T')[0]
     }
-    await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-    setEditing(null)
-    onRefresh()
+
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      const data = await res.json()
+
+      if (!res.ok) {
+        alert(`Error: ${data.error || 'Failed to save article'}`)
+        setSaving(false)
+        return
+      }
+
+      setEditing(null)
+      setSaving(false)
+      onRefresh()
+    } catch (err: any) {
+      alert(`Error: ${err.message || 'Failed to save article'}`)
+      setSaving(false)
+    }
   }
 
   const del = async (id: number) => {
     if (!confirm('Delete this article?')) return
-    await fetch(`/api/articles?id=${id}`, { method: 'DELETE' })
-    onRefresh()
+    try {
+      const res = await fetch(`/api/articles?id=${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json()
+        alert(`Error: ${data.error || 'Failed to delete'}`)
+        return
+      }
+      onRefresh()
+    } catch (err: any) {
+      alert(`Error: ${err.message || 'Failed to delete'}`)
+    }
   }
 
   return (
@@ -337,8 +364,10 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
               </div>
 
               <div className="flex gap-3">
-                <button onClick={save} className="flex-1 py-3 rounded-lg bg-blue-600 text-white font-semibold cursor-pointer hover:bg-blue-700 transition-all">Save Article</button>
-                <button onClick={() => setEditing(null)} className="flex-1 py-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] font-semibold cursor-pointer hover:bg-[var(--card-hover)] transition-all">Cancel</button>
+                <button onClick={save} disabled={saving} className="flex-1 py-3 rounded-lg bg-blue-600 text-white font-semibold cursor-pointer hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                  {saving ? 'Saving...' : 'Save Article'}
+                </button>
+                <button onClick={() => setEditing(null)} disabled={saving} className="flex-1 py-3 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] font-semibold cursor-pointer hover:bg-[var(--card-hover)] transition-all disabled:opacity-50">Cancel</button>
               </div>
             </div>
           </div>
@@ -348,11 +377,14 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
       <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
         <table className="admin-table">
           <thead>
-            <tr><th>ID</th><th>Image</th><th>Title</th><th>Category</th><th>Main</th><th>Featured</th><th>Author</th><th>Actions</th></tr>
+            <tr><th>ID</th><th>Image</th><th>Title</th><th>Category</th><th>Status</th><th>Author</th><th>Date</th><th>Actions</th></tr>
           </thead>
           <tbody>
+            {articles.length === 0 && (
+              <tr><td colSpan={8} className="text-center py-8 text-[var(--text-muted)]">No articles yet. Click "+ New Article" to create one.</td></tr>
+            )}
             {articles.map(a => (
-              <tr key={a.id}>
+              <tr key={a.id} className={a.is_main_news ? 'bg-yellow-500/5' : ''}>
                 <td>{a.id}</td>
                 <td>
                   {a.image_url ? (
@@ -363,14 +395,37 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
                     </div>
                   )}
                 </td>
-                <td><strong>{a.title}</strong></td>
-                <td><span className="badge bg-blue-600/15 text-blue-600">{a.category}</span></td>
-                <td>{a.is_main_news ? <Star size={16} className="text-yellow-500" /> : '—'}</td>
-                <td>{a.featured ? '✓' : '—'}</td>
-                <td>{a.author}</td>
                 <td>
-                  <button onClick={() => openEdit(a)} className="px-3 py-1.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-sm cursor-pointer hover:bg-[var(--card-hover)] transition-all">Edit</button>
-                  <button onClick={() => del(a.id)} className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm cursor-pointer hover:bg-red-700 transition-all ml-2">Delete</button>
+                  <strong className={a.is_main_news ? 'text-yellow-500' : ''}>{a.title}</strong>
+                  {a.is_main_news && <span className="ml-2 text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full">MAIN</span>}
+                  {a.featured && <span className="ml-2 text-xs bg-blue-600/20 text-blue-600 px-2 py-0.5 rounded-full">FEATURED</span>}
+                </td>
+                <td><span className="badge bg-blue-600/15 text-blue-600">{a.category}</span></td>
+                <td>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => toggleMain(a)}
+                      className={`text-xs px-2 py-1 rounded-full cursor-pointer transition-all ${a.is_main_news ? 'bg-yellow-500 text-black font-bold' : 'bg-[var(--bg)] border border-[var(--border)] hover:bg-yellow-500/20'}`}
+                      title={a.is_main_news ? 'Currently MAIN news — click to unset' : 'Set as MAIN news'}
+                    >
+                      {a.is_main_news ? '★ MAIN' : '☆ Set Main'}
+                    </button>
+                    <button
+                      onClick={() => toggleFeatured(a)}
+                      className={`text-xs px-2 py-1 rounded-full cursor-pointer transition-all ${a.featured ? 'bg-blue-600 text-white font-bold' : 'bg-[var(--bg)] border border-[var(--border)] hover:bg-blue-600/20'}`}
+                      title={a.featured ? 'Currently featured — click to unfeature' : 'Feature on homepage'}
+                    >
+                      {a.featured ? '✓ Featured' : '☐ Feature'}
+                    </button>
+                  </div>
+                </td>
+                <td>{a.author}</td>
+                <td className="text-sm text-[var(--text-muted)]">{a.date || a.created_at?.split('T')[0] || '—'}</td>
+                <td>
+                  <div className="flex gap-1">
+                    <button onClick={() => openEdit(a)} className="px-3 py-1.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-sm cursor-pointer hover:bg-[var(--card-hover)] transition-all">Edit</button>
+                    <button onClick={() => del(a.id)} className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm cursor-pointer hover:bg-red-700 transition-all">Delete</button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -379,6 +434,44 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
       </div>
     </div>
   )
+
+  async function toggleMain(a: Article) {
+    const newValue = !a.is_main_news
+    try {
+      const res = await fetch('/api/articles', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: a.id, is_main_news: newValue })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(`Error: ${data.error || 'Failed to update'}`)
+        return
+      }
+      onRefresh()
+    } catch (err: any) {
+      alert(`Error: ${err.message || 'Failed to update'}`)
+    }
+  }
+
+  async function toggleFeatured(a: Article) {
+    const newValue = !a.featured
+    try {
+      const res = await fetch('/api/articles', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: a.id, featured: newValue })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        alert(`Error: ${data.error || 'Failed to update'}`)
+        return
+      }
+      onRefresh()
+    } catch (err: any) {
+      alert(`Error: ${err.message || 'Failed to update'}`)
+    }
+  }
 }
 
 function ScheduleTab({ schedule, onRefresh }: { schedule: ScheduleItem[]; onRefresh: () => void }) {
