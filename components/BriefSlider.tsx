@@ -19,6 +19,7 @@ export default function BriefSlider() {
   const [items, setItems] = useState<BriefItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
     // Try to fetch brief items first
@@ -88,7 +89,7 @@ export default function BriefSlider() {
         <div className="max-w-[1400px] mx-auto flex items-center px-6">
           <div className="shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-black uppercase flex items-center gap-2 shadow-lg mr-4">
             <Newspaper size={16} />
-            <span>Brief</span>
+            <span>Latest</span>
           </div>
           <div className="flex-1 text-black/60 text-sm font-medium">Loading latest news...</div>
         </div>
@@ -102,7 +103,7 @@ export default function BriefSlider() {
         <div className="max-w-[1400px] mx-auto flex items-center px-6">
           <div className="shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-black uppercase flex items-center gap-2 shadow-lg mr-4">
             <Newspaper size={16} />
-            <span>Brief</span>
+            <span>Latest</span>
           </div>
           <div className="flex-1 text-black/60 text-sm font-medium flex items-center gap-2">
             <AlertTriangle size={14} />
@@ -113,24 +114,36 @@ export default function BriefSlider() {
     )
   }
 
-  // Duplicate items for seamless marquee
-  const marqueeItems = [...items, ...items, ...items]
+  // For seamless infinite scroll, duplicate items ONCE (2x total)
+  // Animation scrolls from 0% to -50%, then resets — user never sees the jump
+  const marqueeItems = [...items, ...items]
+  const duration = Math.max(30, items.length * 6) // 6 seconds per item, minimum 30s
 
   return (
-    <div className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 border-b-2 border-yellow-600 py-3 overflow-hidden relative">
+    <div 
+      className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 border-b-2 border-yellow-600 py-3 overflow-hidden relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Shine effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer pointer-events-none" />
 
       <div className="max-w-[1400px] mx-auto flex items-center">
-        {/* Brief Badge */}
-        <div className="shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-black uppercase flex items-center gap-2 shadow-lg z-10 mr-4 animate-pulse">
+        {/* Latest Badge */}
+        <div className="shrink-0 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-black uppercase flex items-center gap-2 shadow-lg z-10 mr-4">
           <Newspaper size={16} />
-          <span>Brief</span>
+          <span>Latest</span>
         </div>
 
-        {/* Marquee Container */}
-        <div className="flex-1 overflow-hidden">
-          <div className="flex animate-marquee whitespace-nowrap">
+        {/* Desktop: Scrolling Marquee */}
+        <div className="hidden md:flex flex-1 overflow-hidden">
+          <div 
+            className="flex whitespace-nowrap"
+            style={{
+              animation: `marquee-scroll ${duration}s linear infinite`,
+              animationPlayState: isHovered ? 'paused' : 'running',
+            }}
+          >
             {marqueeItems.map((item, index) => {
               const title = item.is_manual ? item.custom_title : item.articles?.title
               const excerpt = item.is_manual ? item.custom_excerpt : item.articles?.excerpt
@@ -143,11 +156,12 @@ export default function BriefSlider() {
                     <Link
                       href={`/article/${linkId}`}
                       className="text-black font-semibold no-underline hover:text-red-700 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       {title}
                       {excerpt && (
                         <span className="text-black/60 ml-2 font-normal">
-                          — {excerpt.slice(0, 60)}...
+                          — {excerpt.slice(0, 50)}...
                         </span>
                       )}
                     </Link>
@@ -156,7 +170,7 @@ export default function BriefSlider() {
                       {title}
                       {excerpt && (
                         <span className="text-black/60 ml-2 font-normal">
-                          — {excerpt.slice(0, 60)}...
+                          — {excerpt.slice(0, 50)}...
                         </span>
                       )}
                     </span>
@@ -166,15 +180,38 @@ export default function BriefSlider() {
             })}
           </div>
         </div>
+
+        {/* Mobile: Static List (no scroll) */}
+        <div className="md:hidden flex-1">
+          <div className="flex flex-wrap gap-x-6 gap-y-1">
+            {items.slice(0, 4).map((item) => {
+              const title = item.is_manual ? item.custom_title : item.articles?.title
+              const linkId = item.is_manual ? null : item.article_id
+
+              return (
+                <span key={item.id} className="inline-flex items-center">
+                  <span className="w-1.5 h-1.5 bg-red-600 rounded-full mr-2 shrink-0" />
+                  {linkId ? (
+                    <Link href={`/article/${linkId}`} className="text-black text-sm font-medium no-underline hover:text-red-700 transition-colors">
+                      {title}
+                    </Link>
+                  ) : (
+                    <span className="text-black text-sm font-medium">{title}</span>
+                  )}
+                </span>
+              )
+            })}
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
-        @keyframes marquee {
+        @keyframes marquee-scroll {
           0% {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-33.33%);
+            transform: translateX(-50%);
           }
         }
         @keyframes shimmer {
@@ -184,9 +221,6 @@ export default function BriefSlider() {
           100% {
             transform: translateX(100%);
           }
-        }
-        .animate-marquee {
-          animation: marquee 20s linear infinite;
         }
         .animate-shimmer {
           animation: shimmer 3s infinite;
