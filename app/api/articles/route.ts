@@ -64,7 +64,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json()
     const { id, ...update } = body
 
-    if (!id) {
+    if (id === undefined || id === null || id === '') {
       return NextResponse.json({ error: 'Article ID is required' }, { status: 400 })
     }
 
@@ -99,7 +99,7 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
-    if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+    if (id === null || id === undefined || id === '') return NextResponse.json({ error: 'Missing id' }, { status: 400 })
 
     const { error } = await supabaseAdmin.from('articles').delete().eq('id', id)
     if (error) {
