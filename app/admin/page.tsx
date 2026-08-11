@@ -7,7 +7,7 @@ import Header from '@/components/Header'
 import { Article, Report, ScheduleItem, AnalyticsSummary } from '@/types'
 import {
   LayoutDashboard, FileText, Calendar, Inbox, Settings, Users, Newspaper, BarChart3,
-  Image as ImageIcon, Star, TrendingUp, Eye, Users as UsersIcon, Activity
+  Image as ImageIcon, Star, TrendingUp, Eye, Users as UsersIcon, Activity, Megaphone
 } from 'lucide-react'
 
 const tabs = [
@@ -17,6 +17,7 @@ const tabs = [
   { id: 'reports', label: 'Reports', icon: Inbox },
   { id: 'users', label: 'Users', icon: Users },
   { id: 'brief', label: 'Brief', icon: Newspaper },
+  { id: 'ads', label: 'Ads', icon: Megaphone },
   { id: 'settings', label: 'Settings', icon: Settings },
 ]
 
@@ -136,6 +137,7 @@ export default function AdminPage() {
           {activeTab === 'reports' && <ReportsTab reports={reports} onRefresh={() => fetch('/api/reports').then(r => r.json()).then(setReports)} />}
           {activeTab === 'users' && <UsersRedirect />}
           {activeTab === 'brief' && <BriefRedirect />}
+          {activeTab === 'ads' && <AdsRedirect />}
           {activeTab === 'settings' && <SettingsRedirect />}
         </main>
       </div>
@@ -510,6 +512,15 @@ function BriefRedirect() {
     <div className="text-center py-12">
       <p className="text-[var(--text-muted)] mb-4">Brief management has its own dedicated page.</p>
       <Link href="/admin/brief" className="px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold no-underline hover:bg-blue-700 transition-all">Go to Brief Page</Link>
+    </div>
+  )
+}
+
+function AdsRedirect() {
+  return (
+    <div className="text-center py-12">
+      <p className="text-[var(--text-muted)] mb-4">Advertisement management has its own dedicated page.</p>
+      <Link href="/admin/ads" className="px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold no-underline hover:bg-blue-700 transition-all">Go to Ads Page</Link>
     </div>
   )
 }

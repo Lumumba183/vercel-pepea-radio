@@ -36,85 +36,78 @@ export default async function HomePage() {
       {/* Hero / Main News Section */}
       <section className="max-w-[1400px] mx-auto px-6 py-8">
         {mainNews && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
             {/* Main News - Large */}
-            <div className="lg:col-span-3">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  <Link href={`/article/${mainNews.id}`} className="group block no-underline">
-                    <div className="relative rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--card)]">
-                      <div className="relative aspect-[16/10] overflow-hidden">
-                        {mainNews.image_url ? (
-                          <img
-                            src={mainNews.image_url}
-                            alt={mainNews.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)] flex items-center justify-center">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)]">
-                              <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
-                            </svg>
-                          </div>
-                        )}
-                        <div className="absolute top-4 left-4">
-                          <span className="bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase flex items-center gap-1">
-                            <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                            MAIN NEWS
-                          </span>
-                        </div>
+            <div className="lg:col-span-2">
+              <Link href={`/article/${mainNews.id}`} className="group block no-underline">
+                <div className="relative rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--card)]">
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    {mainNews.image_url ? (
+                      <img
+                        src={mainNews.image_url}
+                        alt={mainNews.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)] flex items-center justify-center">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)]">
+                          <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                        </svg>
                       </div>
-                      <div className="p-6">
-                        <span className="inline-block bg-blue-600/15 text-blue-600 px-3 py-1 rounded-full text-xs font-bold uppercase mb-3">
-                          {mainNews.category}
-                        </span>
-                        <h2 className="text-2xl lg:text-3xl font-black text-[var(--text)] leading-tight mb-3 group-hover:text-blue-400 transition-colors">
-                          {mainNews.title}
-                        </h2>
-                        <p className="text-[var(--text-muted)] text-[0.9375rem] leading-relaxed mb-4">
-                          {mainNews.excerpt}
-                        </p>
-                        <div className="flex items-center gap-4 text-[var(--text-muted)] text-sm">
-                          <span className="flex items-center gap-1"><User size={14} /> {mainNews.author}</span>
-                          <span className="flex items-center gap-1"><Clock size={14} /> {mainNews.read_time}</span>
-                          <span>{new Date(mainNews.date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                        </div>
-                      </div>
+                    )}
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase flex items-center gap-1">
+                        <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                        MAIN NEWS
+                      </span>
                     </div>
-                  </Link>
+                  </div>
+                  <div className="p-6">
+                    <span className="inline-block bg-blue-600/15 text-blue-600 px-3 py-1 rounded-full text-xs font-bold uppercase mb-3">
+                      {mainNews.category}
+                    </span>
+                    <h2 className="text-2xl lg:text-3xl font-black text-[var(--text)] leading-tight mb-3 group-hover:text-blue-400 transition-colors">
+                      {mainNews.title}
+                    </h2>
+                    <p className="text-[var(--text-muted)] text-[0.9375rem] leading-relaxed mb-4">
+                      {mainNews.excerpt}
+                    </p>
+                    <div className="flex items-center gap-4 text-[var(--text-muted)] text-sm">
+                      <span className="flex items-center gap-1"><User size={14} /> {mainNews.author}</span>
+                      <span className="flex items-center gap-1"><Clock size={14} /> {mainNews.read_time}</span>
+                      <span>{new Date(mainNews.date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                    </div>
+                  </div>
                 </div>
-
-                {/* Side News - Smaller stacked */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-[var(--text-muted)] uppercase tracking-wide">More News</h3>
-                  {sideArticles.map(article => (
-                    <Link key={article.id} href={`/article/${article.id}`} className="group flex gap-4 no-underline bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 hover:border-blue-600 transition-all">
-                      <div className="w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)]">
-                        {article.image_url ? (
-                          <img src={article.image_url} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)]">
-                              <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs font-bold text-blue-600 uppercase">{article.category}</span>
-                        <h4 className="font-bold text-[var(--text)] text-sm leading-snug mt-1 group-hover:text-blue-400 transition-colors line-clamp-2">
-                          {article.title}
-                        </h4>
-                        <p className="text-[var(--text-muted)] text-xs mt-1">{article.author}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+              </Link>
             </div>
 
-            {/* Sidebar Ad Space */}
-            <div className="lg:col-span-1">
+            {/* Side News + Ad below */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-[var(--text-muted)] uppercase tracking-wide">More News</h3>
+              {sideArticles.map(article => (
+                <Link key={article.id} href={`/article/${article.id}`} className="group flex gap-4 no-underline bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 hover:border-blue-600 transition-all">
+                  <div className="w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)]">
+                    {article.image_url ? (
+                      <img src={article.image_url} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)]">
+                          <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-bold text-blue-600 uppercase">{article.category}</span>
+                    <h4 className="font-bold text-[var(--text)] text-sm leading-snug mt-1 group-hover:text-blue-400 transition-colors line-clamp-2">
+                      {article.title}
+                    </h4>
+                    <p className="text-[var(--text-muted)] text-xs mt-1">{article.author}</p>
+                  </div>
+                </Link>
+              ))}
+              {/* Ad Space below articles */}
               <AdSpace position="sidebar" />
             </div>
           </div>
@@ -157,22 +150,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Advertise */}
-      <section className="max-w-[1400px] mx-auto px-6 py-16">
+      {/* Bottom Advertisement Banners */}
+      <section className="max-w-[1400px] mx-auto px-6 py-8">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-extrabold bg-gradient-to-r from-white to-[var(--text-muted)] bg-clip-text text-transparent">Advertise With Us</h2>
           <p className="text-[var(--text-muted)] text-[0.9375rem]">Reach thousands of engaged listeners across Kenya and the diaspora</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1000px] mx-auto">
-          <PriceCard title="Starter" price="KES 5,000" period="/week" features={['Homepage banner (728×90)', 'News page sidebar ad', 'Social media mention ×2', 'Basic analytics report']} />
-          <PriceCard title="Professional" price="KES 15,000" period="/week" featured features={['All Starter features', 'Player area premium slot', 'Dedicated advert page feature', 'On-air mention ×3', 'WhatsApp blast to subscribers']} />
-          <PriceCard title="Enterprise" price="KES 35,000" period="/week" features={['All Professional features', 'Exclusive homepage takeover', 'Live event sponsorship', 'Pepea TV video ad placement', 'Dedicated campaign manager']} />
-        </div>
-      </section>
-
-      {/* Bottom Advertisement Banners */}
-      <section className="max-w-[1400px] mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1000px] mx-auto">
           <AdSpace position="bottom-left" />
           <AdSpace position="bottom-right" />
         </div>
@@ -237,24 +221,3 @@ function TvCard({ title, desc }: { title: string; desc: string }) {
   )
 }
 
-function PriceCard({ title, price, period, features, featured }: { title: string; price: string; period: string; features: string[]; featured?: boolean }) {
-  return (
-    <div className={`bg-[var(--card)] rounded-xl p-8 border text-center transition-all hover:border-blue-600 hover:-translate-y-1 relative overflow-hidden ${featured ? 'border-gold' : 'border-[var(--border)]'}`}>
-      {featured && (
-        <div className="absolute top-0 right-0 bg-gold text-black text-[0.625rem] font-extrabold px-3 py-1 rounded-bl-lg">MOST POPULAR</div>
-      )}
-      <h3 className="text-xl font-bold">{title}</h3>
-      <div className="text-4xl font-black text-[var(--text)] my-4">{price}<span className="text-base text-[var(--text-muted)] font-normal">{period}</span></div>
-      <ul className="list-none text-left my-6 space-y-2">
-        {features.map((f, i) => (
-          <li key={i} className="flex items-center gap-2 text-[var(--text-muted)] py-1">
-            <span className="text-success font-bold">✓</span> {f}
-          </li>
-        ))}
-      </ul>
-      <Link href="/advertise" className={`inline-flex items-center justify-center w-full py-3 rounded-xl font-semibold no-underline transition-all ${featured ? 'bg-gradient-to-br from-red-600 to-red-800 text-white' : 'bg-[var(--card)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--card-hover)]'}`}>
-        {featured ? 'Get Started' : title === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
-      </Link>
-    </div>
-  )
-}

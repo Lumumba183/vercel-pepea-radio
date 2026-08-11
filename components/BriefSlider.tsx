@@ -99,7 +99,7 @@ export default function BriefSlider() {
           }
         }
         .animate-marquee {
-          animation: marquee 30s linear infinite;
+          animation: marquee 20s linear infinite;
         }
         .animate-shimmer {
           animation: shimmer 3s infinite;
