@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Megaphone, Plus, Trash2, Edit2, X, Check, Calendar, Eye, EyeOff, Upload, ImageIcon } from 'lucide-react'
+import { Megaphone, Plus, Trash2, Edit2, X, Calendar, Eye, EyeOff } from 'lucide-react'
 
 interface Advertisement {
   id: number
@@ -16,7 +15,6 @@ interface Advertisement {
 }
 
 export default function AdminAdsPage() {
-  const router = useRouter()
   const [ads, setAds] = useState<Advertisement[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -31,8 +29,6 @@ export default function AdminAdsPage() {
     expires_at: '',
     is_active: true
   })
-  const [uploading, setUploading] = useState(false)
-  const [uploadPreview, setUploadPreview] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAds()
@@ -61,53 +57,10 @@ export default function AdminAdsPage() {
     }
   }
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file (JPG, PNG, GIF, WebP)')
-      return
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB')
-      return
-    }
-
-    setUploading(true)
-    setUploadPreview(null)
-
-    try {
-      const uploadForm = new FormData()
-      uploadForm.append('file', file)
-
-      const res = await fetch('/api/upload/ad-image', {
-        method: 'POST',
-        body: uploadForm
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Upload failed')
-      }
-
-      setForm(prev => ({ ...prev, image_url: data.url }))
-      setUploadPreview(data.url)
-    } catch (err: any) {
-      alert('Upload failed: ' + (err.message || 'Unknown error'))
-    } finally {
-      setUploading(false)
-    }
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     
-    const url = editingAd ? '/api/advertisements' : '/api/advertisements'
+    const url = '/api/advertisements'
     const method = editingAd ? 'PUT' : 'POST'
     const body = editingAd ? { ...form, id: editingAd.id } : form
 
@@ -118,27 +71,30 @@ export default function AdminAdsPage() {
         body: JSON.stringify(body)
       })
 
-      if (!res.ok) throw new Error('Failed to save')
+      if (!res.ok) {
+        const data = await res.json()
+        alert('Error: ' + (data.error || 'Failed to save'))
+        return
+      }
 
       setShowForm(false)
       setEditingAd(null)
       setForm({ title: '', image_url: '', link_url: '', position: 'sidebar', expires_at: '', is_active: true })
-      setUploadPreview(null)
       fetchAds()
-    } catch (err) {
-      alert('Failed to save advertisement')
+    } catch (err: any) {
+      alert('Failed to save: ' + err.message)
     }
   }
 
   async function handleDelete(id: number) {
-    if (!confirm('Are you sure you want to delete this advertisement?')) return
+    if (!confirm('Delete this advertisement?')) return
 
     try {
       const res = await fetch(`/api/advertisements?id=${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to delete')
       fetchAds()
     } catch (err) {
-      alert('Failed to delete advertisement')
+      alert('Failed to delete')
     }
   }
 
@@ -152,14 +108,13 @@ export default function AdminAdsPage() {
       expires_at: ad.expires_at.slice(0, 16),
       is_active: ad.is_active
     })
-    setUploadPreview(ad.image_url)
     setShowForm(true)
   }
 
   const positions = [
-    { value: 'sidebar', label: 'Sidebar Banner', size: '300 × 600 px', orientation: 'Portrait' },
-    { value: 'bottom-left', label: 'Bottom Banner Left', size: '800 × 200 px', orientation: 'Landscape' },
-    { value: 'bottom-right', label: 'Bottom Banner Right', size: '800 × 200 px', orientation: 'Landscape' }
+    { value: 'sidebar', label: 'Sidebar Banner', size: '300 × 600 px' },
+    { value: 'bottom-left', label: 'Bottom Banner Left', size: '800 × 200 px' },
+    { value: 'bottom-right', label: 'Bottom Banner Right', size: '800 × 200 px' }
   ]
 
   if (loading) {
@@ -176,15 +131,14 @@ export default function AdminAdsPage() {
         <div>
           <h1 className="text-3xl font-extrabold flex items-center gap-3">
             <Megaphone size={32} className="text-blue-500" />
-            Advertisement Management
+            Advertisements
           </h1>
-          <p className="text-[var(--text-muted)] mt-1">Manage ads, upload creatives, and track inquiries</p>
+          <p className="text-[var(--text-muted)] mt-1">Manage ads on your website</p>
         </div>
         <button
           onClick={() => {
             setEditingAd(null)
             setForm({ title: '', image_url: '', link_url: '', position: 'sidebar', expires_at: '', is_active: true })
-            setUploadPreview(null)
             setShowForm(true)
           }}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold bg-blue-600 text-white hover:bg-blue-500 transition-all"
@@ -196,16 +150,16 @@ export default function AdminAdsPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
         <StatCard label="Total Ads" value={ads.length} icon={<Megaphone size={20} />} />
-        <StatCard label="Active Ads" value={ads.filter(a => a.is_active && new Date(a.expires_at) > new Date()).length} icon={<Eye size={20} />} color="green" />
+        <StatCard label="Active" value={ads.filter(a => a.is_active && new Date(a.expires_at) > new Date()).length} icon={<Eye size={20} />} color="green" />
         <StatCard label="Expired" value={ads.filter(a => new Date(a.expires_at) < new Date()).length} icon={<Calendar size={20} />} color="red" />
-        <StatCard label="Inquiries" value={inquiries.length} icon={<Upload size={20} />} color="blue" />
+        <StatCard label="Inquiries" value={inquiries.length} icon={<Megaphone size={20} />} color="blue" />
       </div>
 
       {/* Add/Edit Form */}
       {showForm && (
         <div className="bg-[var(--card)] rounded-xl p-6 border border-[var(--border)] mb-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold">{editingAd ? 'Edit Advertisement' : 'New Advertisement'}</h2>
+            <h2 className="text-xl font-bold">{editingAd ? 'Edit Ad' : 'New Ad'}</h2>
             <button onClick={() => setShowForm(false)} className="p-2 rounded-lg hover:bg-[var(--bg-light)] transition-colors">
               <X size={20} />
             </button>
@@ -213,76 +167,28 @@ export default function AdminAdsPage() {
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold mb-2">Advertisement Title *</label>
+              <label className="block text-sm font-semibold mb-2">Title *</label>
               <input
                 type="text"
                 required
                 value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl bg-[var(--bg-light)] border border-[var(--border)] text-[var(--text)] focus:border-blue-600 focus:outline-none"
-                placeholder="e.g. Safaricom 5G Launch"
+                placeholder="e.g. Safaricom 5G"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold mb-2">Advertisement Image *</label>
-              
-              {/* Upload Option */}
-              <div className="mb-3">
-                <label className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[var(--bg-light)] border border-[var(--border)] hover:border-blue-600 cursor-pointer transition-all">
-                  <Upload size={18} className="text-blue-500" />
-                  <span className="text-sm">
-                    {uploading ? 'Uploading...' : uploadPreview ? 'Change Image' : 'Upload Image File'}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploading}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-
-              {/* Or paste URL */}
-              <div className="flex items-center gap-3 mb-3">
-                <div className="flex-1 h-px bg-[var(--border)]" />
-                <span className="text-xs text-[var(--text-muted)]">OR paste image URL</span>
-                <div className="flex-1 h-px bg-[var(--border)]" />
-              </div>
-
+              <label className="block text-sm font-semibold mb-2">Image URL *</label>
               <input
                 type="url"
                 required
                 value={form.image_url}
-                onChange={e => { setForm({ ...form, image_url: e.target.value }); setUploadPreview(null) }}
+                onChange={e => setForm({ ...form, image_url: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl bg-[var(--bg-light)] border border-[var(--border)] text-[var(--text)] focus:border-blue-600 focus:outline-none"
-                placeholder="https://your-cdn.com/ad-image.jpg"
+                placeholder="https://example.com/ad-image.jpg"
               />
-
-              {/* Image Preview */}
-              {(uploadPreview || form.image_url) && (
-                <div className="mt-3 p-3 bg-[var(--bg-light)] rounded-xl border border-[var(--border)]">
-                  <p className="text-xs text-[var(--text-muted)] mb-2">Preview:</p>
-                  <img 
-                    src={uploadPreview || form.image_url} 
-                    alt="Ad preview" 
-                    className="max-h-[200px] rounded-lg object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none'
-                    }}
-                  />
-                </div>
-              )}
-
-              <div className="mt-3 p-3 bg-yellow-600/10 border border-yellow-600/30 rounded-lg">
-                <p className="text-yellow-400 text-xs font-semibold mb-1">📐 Image Size Requirements</p>
-                <ul className="text-[var(--text-muted)] text-xs space-y-1">
-                  {positions.map(pos => (
-                    <li key={pos.value}>• <strong>{pos.label}:</strong> {pos.size} ({pos.orientation})</li>
-                  ))}
-                </ul>
-              </div>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Paste a direct link to an image (JPG, PNG, GIF)</p>
             </div>
 
             <div className="md:col-span-2">
@@ -292,12 +198,12 @@ export default function AdminAdsPage() {
                 value={form.link_url}
                 onChange={e => setForm({ ...form, link_url: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl bg-[var(--bg-light)] border border-[var(--border)] text-[var(--text)] focus:border-blue-600 focus:outline-none"
-                placeholder="https://client-website.com/landing-page"
+                placeholder="https://client-website.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2">Ad Position *</label>
+              <label className="block text-sm font-semibold mb-2">Position *</label>
               <select
                 required
                 value={form.position}
@@ -305,7 +211,7 @@ export default function AdminAdsPage() {
                 className="w-full px-4 py-3 rounded-xl bg-[var(--bg-light)] border border-[var(--border)] text-[var(--text)] focus:border-blue-600 focus:outline-none"
               >
                 {positions.map(pos => (
-                  <option key={pos.value} value={pos.value}>{pos.label} — {pos.size} ({pos.orientation})</option>
+                  <option key={pos.value} value={pos.value}>{pos.label} ({pos.size})</option>
                 ))}
               </select>
             </div>
@@ -338,17 +244,17 @@ export default function AdminAdsPage() {
                 type="submit"
                 className="px-8 py-3 rounded-xl font-semibold bg-blue-600 text-white hover:bg-blue-500 transition-all"
               >
-                {editingAd ? 'Update Advertisement' : 'Create Advertisement'}
+                {editingAd ? 'Update Ad' : 'Create Ad'}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Advertisements Table */}
+      {/* Ads Table */}
       <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] overflow-hidden mb-8">
         <div className="px-6 py-4 border-b border-[var(--border)]">
-          <h2 className="text-lg font-bold">Active Advertisements</h2>
+          <h2 className="text-lg font-bold">All Advertisements</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -377,9 +283,6 @@ export default function AdminAdsPage() {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       {positions.find(p => p.value === ad.position)?.label || ad.position}
-                      <p className="text-[var(--text-muted)] text-xs">
-                        {positions.find(p => p.value === ad.position)?.size || ''}
-                      </p>
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <span className={isExpired ? 'text-red-500' : 'text-green-500'}>
@@ -394,16 +297,10 @@ export default function AdminAdsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleEdit(ad)}
-                          className="p-2 rounded-lg hover:bg-[var(--bg-light)] transition-colors text-blue-500"
-                        >
+                        <button onClick={() => handleEdit(ad)} className="p-2 rounded-lg hover:bg-[var(--bg-light)] text-blue-500">
                           <Edit2 size={16} />
                         </button>
-                        <button
-                          onClick={() => handleDelete(ad.id)}
-                          className="p-2 rounded-lg hover:bg-red-600/10 transition-colors text-red-500"
-                        >
+                        <button onClick={() => handleDelete(ad.id)} className="p-2 rounded-lg hover:bg-red-600/10 text-red-500">
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -414,7 +311,7 @@ export default function AdminAdsPage() {
               {ads.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-[var(--text-muted)]">
-                    No advertisements yet. Click "Add Advertisement" to create one.
+                    No ads yet. Click "Add Advertisement" to create one.
                   </td>
                 </tr>
               )}
@@ -434,7 +331,7 @@ export default function AdminAdsPage() {
               <tr>
                 <th className="text-left px-6 py-3 text-sm font-semibold">Name</th>
                 <th className="text-left px-6 py-3 text-sm font-semibold">Contact</th>
-                <th className="text-left px-6 py-3 text-sm font-semibold">Ad Space</th>
+                <th className="text-left px-6 py-3 text-sm font-semibold">Space</th>
                 <th className="text-left px-6 py-3 text-sm font-semibold">Message</th>
                 <th className="text-left px-6 py-3 text-sm font-semibold">Date</th>
               </tr>
@@ -448,7 +345,7 @@ export default function AdminAdsPage() {
                     <p className="text-[var(--text-muted)]">{inq.phone}</p>
                   </td>
                   <td className="px-6 py-4 text-sm">
-                    <span className="inline-flex px-2 py-1 rounded-full bg-blue-600/20 text-blue-500 text-xs font-semibold">
+                    <span className="px-2 py-1 rounded-full bg-blue-600/20 text-blue-500 text-xs font-semibold">
                       {inq.ad_space || 'Not specified'}
                     </span>
                   </td>
