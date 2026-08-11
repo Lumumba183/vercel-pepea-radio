@@ -110,9 +110,9 @@ export default function AdminAdsPage() {
   }
 
   const positions = [
-    { value: 'sidebar', label: 'Sidebar Banner (300×600)' },
-    { value: 'bottom-left', label: 'Bottom Banner Left (800×200)' },
-    { value: 'bottom-right', label: 'Bottom Banner Right (800×200)' }
+    { value: 'sidebar', label: 'Sidebar Banner', size: '300 × 600 px', orientation: 'Portrait' },
+    { value: 'bottom-left', label: 'Bottom Banner Left', size: '800 × 200 px', orientation: 'Landscape' },
+    { value: 'bottom-right', label: 'Bottom Banner Right', size: '800 × 200 px', orientation: 'Landscape' }
   ]
 
   if (loading) {
@@ -186,7 +186,15 @@ export default function AdminAdsPage() {
                 className="w-full px-4 py-3 rounded-xl bg-[var(--bg-light)] border border-[var(--border)] text-[var(--text)] focus:border-blue-600 focus:outline-none"
                 placeholder="https://your-cdn.com/ad-image.jpg"
               />
-              <p className="text-xs text-[var(--text-muted)] mt-1">Upload your image to a CDN or image host and paste the URL here</p>
+              <div className="mt-2 p-3 bg-yellow-600/10 border border-yellow-600/30 rounded-lg">
+                <p className="text-yellow-400 text-xs font-semibold mb-1">📐 Image Size Requirements</p>
+                <ul className="text-[var(--text-muted)] text-xs space-y-1">
+                  {positions.map(pos => (
+                    <li key={pos.value}>• <strong>{pos.label}:</strong> {pos.size} ({pos.orientation})</li>
+                  ))}
+                </ul>
+                <p className="text-[var(--text-muted)] text-xs mt-1">Upload your ad image to a CDN or image host and paste the URL above.</p>
+              </div>
             </div>
 
             <div className="md:col-span-2">
@@ -209,7 +217,7 @@ export default function AdminAdsPage() {
                 className="w-full px-4 py-3 rounded-xl bg-[var(--bg-light)] border border-[var(--border)] text-[var(--text)] focus:border-blue-600 focus:outline-none"
               >
                 {positions.map(pos => (
-                  <option key={pos.value} value={pos.value}>{pos.label}</option>
+                  <option key={pos.value} value={pos.value}>{pos.label} — {pos.size} ({pos.orientation})</option>
                 ))}
               </select>
             </div>
@@ -281,6 +289,9 @@ export default function AdminAdsPage() {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       {positions.find(p => p.value === ad.position)?.label || ad.position}
+                      <p className="text-[var(--text-muted)] text-xs">
+                        {positions.find(p => p.value === ad.position)?.size || ''}
+                      </p>
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <span className={isExpired ? 'text-red-500' : 'text-green-500'}>

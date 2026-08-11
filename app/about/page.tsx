@@ -13,7 +13,11 @@ export default function AboutPage() {
 
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-8 mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center text-white font-black text-2xl">PR</div>
+            <img 
+              src="/logo-pepea-radio.jpg" 
+              alt="Pepea Radio" 
+              className="w-16 h-16 rounded-xl object-cover"
+            />
             <div>
               <h2 className="text-2xl font-bold">Our Story</h2>
               <p className="text-[var(--text-muted)]">Broadcasting since 2018</p>

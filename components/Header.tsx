@@ -25,9 +25,11 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-[1000] bg-[rgba(10,14,26,0.95)] backdrop-blur-[12px] border-b border-[var(--border)] transition-all">
       <div className="max-w-[1400px] mx-auto flex items-center justify-between px-6 py-3">
         <Link href="/" className="flex items-center gap-3 no-underline text-[var(--text)]">
-          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center font-black text-2xl text-white relative overflow-hidden">
-            PR
-          </div>
+          <img 
+            src="/logo-pepea-radio.jpg" 
+            alt="Pepea Radio" 
+            className="w-12 h-12 rounded-lg object-cover shrink-0"
+          />
           <div>
             <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-red-600 to-blue-600 bg-clip-text text-transparent">
               PEPEA RADIO

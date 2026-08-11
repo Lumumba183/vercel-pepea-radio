@@ -102,6 +102,14 @@ function BookThisSpace({ position, size, className }: { position: string; size: 
     'bottom-right': 'Bottom Banner (Right)'
   }
 
+  const positionSpecs: Record<string, { size: string; pixels: string }> = {
+    'sidebar': { size: '300 × 600 px', pixels: 'Portrait / Vertical' },
+    'bottom-left': { size: '800 × 200 px', pixels: 'Landscape / Horizontal' },
+    'bottom-right': { size: '800 × 200 px', pixels: 'Landscape / Horizontal' }
+  }
+
+  const spec = positionSpecs[position]
+
   return (
     <div className={`${size.width} ${className}`}>
       <Link 
@@ -113,7 +121,8 @@ function BookThisSpace({ position, size, className }: { position: string; size: 
             <Megaphone size={24} className="text-blue-500" />
           </div>
           <h4 className="font-bold text-[var(--text)] text-sm mb-1">Book This Space</h4>
-          <p className="text-[var(--text-muted)] text-xs mb-3">{positionLabels[position]}</p>
+          <p className="text-[var(--text-muted)] text-xs mb-1">{positionLabels[position]}</p>
+          <p className="text-blue-500 text-[10px] font-semibold mb-3">{spec.size} • {spec.pixels}</p>
           <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-600 text-white text-xs font-semibold group-hover:bg-blue-500 transition-colors">
             <Eye size={12} />
             Advertise Here
