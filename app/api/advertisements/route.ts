@@ -14,38 +14,83 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const { data, error } = await supabaseAdmin
-    .from('advertisements')
-    .insert(body)
-    .select()
-    .single()
-  
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data, { status: 201 })
+  try {
+    const body = await req.json()
+    
+    // Validate required fields
+    if (!body.title?.trim()) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+    }
+    if (!body.image_url?.trim()) {
+      return NextResponse.json({ error: 'Image URL is required' }, { status: 400 })
+    }
+    if (!body.position) {
+      return NextResponse.json({ error: 'Position is required' }, { status: 400 })
+    }
+    if (!body.expires_at) {
+      return NextResponse.json({ error: 'Expiry date is required' }, { status: 400 })
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('advertisements')
+      .insert(body)
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('POST ad error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+    return NextResponse.json(data, { status: 201 })
+  } catch (err: any) {
+    console.error('POST ad unexpected error:', err)
+    return NextResponse.json({ error: err.message || 'Failed to create ad' }, { status: 500 })
+  }
 }
 
 export async function PUT(req: NextRequest) {
-  const body = await req.json()
-  const { id, ...update } = body
-  
-  const { data, error } = await supabaseAdmin
-    .from('advertisements')
-    .update(update)
-    .eq('id', id)
-    .select()
-    .single()
-  
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  try {
+    const body = await req.json()
+    const { id, ...update } = body
+    
+    if (id === undefined || id === null || id === '') {
+      return NextResponse.json({ error: 'Ad ID is required' }, { status: 400 })
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('advertisements')
+      .update(update)
+      .eq('id', id)
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('PUT ad error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+    return NextResponse.json(data)
+  } catch (err: any) {
+    console.error('PUT ad unexpected error:', err)
+    return NextResponse.json({ error: err.message || 'Failed to update ad' }, { status: 500 })
+  }
 }
 
 export async function DELETE(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const id = searchParams.get('id')
-  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
-  
-  const { error } = await supabaseAdmin.from('advertisements').delete().eq('id', id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true })
+  try {
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get('id')
+    if (id === null || id === undefined || id === '') {
+      return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+    }
+    
+    const { error } = await supabaseAdmin.from('advertisements').delete().eq('id', id)
+    if (error) {
+      console.error('DELETE ad error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    console.error('DELETE ad unexpected error:', err)
+    return NextResponse.json({ error: err.message || 'Failed to delete ad' }, { status: 500 })
+  }
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Megaphone, Plus, Trash2, Edit2, X, Check, Calendar, Eye, EyeOff, Upload } from 'lucide-react'
+import { Megaphone, Plus, Trash2, Edit2, X, Check, Calendar, Eye, EyeOff, Upload, ImageIcon } from 'lucide-react'
 
 interface Advertisement {
   id: number
@@ -31,6 +31,8 @@ export default function AdminAdsPage() {
     expires_at: '',
     is_active: true
   })
+  const [uploading, setUploading] = useState(false)
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAds()
@@ -59,6 +61,49 @@ export default function AdminAdsPage() {
     }
   }
 
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (JPG, PNG, GIF, WebP)')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB')
+      return
+    }
+
+    setUploading(true)
+    setUploadPreview(null)
+
+    try {
+      const uploadForm = new FormData()
+      uploadForm.append('file', file)
+
+      const res = await fetch('/api/upload/ad-image', {
+        method: 'POST',
+        body: uploadForm
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Upload failed')
+      }
+
+      setForm(prev => ({ ...prev, image_url: data.url }))
+      setUploadPreview(data.url)
+    } catch (err: any) {
+      alert('Upload failed: ' + (err.message || 'Unknown error'))
+    } finally {
+      setUploading(false)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     
@@ -78,6 +123,7 @@ export default function AdminAdsPage() {
       setShowForm(false)
       setEditingAd(null)
       setForm({ title: '', image_url: '', link_url: '', position: 'sidebar', expires_at: '', is_active: true })
+      setUploadPreview(null)
       fetchAds()
     } catch (err) {
       alert('Failed to save advertisement')
@@ -106,6 +152,7 @@ export default function AdminAdsPage() {
       expires_at: ad.expires_at.slice(0, 16),
       is_active: ad.is_active
     })
+    setUploadPreview(ad.image_url)
     setShowForm(true)
   }
 
@@ -137,6 +184,7 @@ export default function AdminAdsPage() {
           onClick={() => {
             setEditingAd(null)
             setForm({ title: '', image_url: '', link_url: '', position: 'sidebar', expires_at: '', is_active: true })
+            setUploadPreview(null)
             setShowForm(true)
           }}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold bg-blue-600 text-white hover:bg-blue-500 transition-all"
@@ -177,23 +225,63 @@ export default function AdminAdsPage() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold mb-2">Image URL *</label>
+              <label className="block text-sm font-semibold mb-2">Advertisement Image *</label>
+              
+              {/* Upload Option */}
+              <div className="mb-3">
+                <label className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[var(--bg-light)] border border-[var(--border)] hover:border-blue-600 cursor-pointer transition-all">
+                  <Upload size={18} className="text-blue-500" />
+                  <span className="text-sm">
+                    {uploading ? 'Uploading...' : uploadPreview ? 'Change Image' : 'Upload Image File'}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Or paste URL */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1 h-px bg-[var(--border)]" />
+                <span className="text-xs text-[var(--text-muted)]">OR paste image URL</span>
+                <div className="flex-1 h-px bg-[var(--border)]" />
+              </div>
+
               <input
                 type="url"
                 required
                 value={form.image_url}
-                onChange={e => setForm({ ...form, image_url: e.target.value })}
+                onChange={e => { setForm({ ...form, image_url: e.target.value }); setUploadPreview(null) }}
                 className="w-full px-4 py-3 rounded-xl bg-[var(--bg-light)] border border-[var(--border)] text-[var(--text)] focus:border-blue-600 focus:outline-none"
                 placeholder="https://your-cdn.com/ad-image.jpg"
               />
-              <div className="mt-2 p-3 bg-yellow-600/10 border border-yellow-600/30 rounded-lg">
+
+              {/* Image Preview */}
+              {(uploadPreview || form.image_url) && (
+                <div className="mt-3 p-3 bg-[var(--bg-light)] rounded-xl border border-[var(--border)]">
+                  <p className="text-xs text-[var(--text-muted)] mb-2">Preview:</p>
+                  <img 
+                    src={uploadPreview || form.image_url} 
+                    alt="Ad preview" 
+                    className="max-h-[200px] rounded-lg object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
+                </div>
+              )}
+
+              <div className="mt-3 p-3 bg-yellow-600/10 border border-yellow-600/30 rounded-lg">
                 <p className="text-yellow-400 text-xs font-semibold mb-1">📐 Image Size Requirements</p>
                 <ul className="text-[var(--text-muted)] text-xs space-y-1">
                   {positions.map(pos => (
                     <li key={pos.value}>• <strong>{pos.label}:</strong> {pos.size} ({pos.orientation})</li>
                   ))}
                 </ul>
-                <p className="text-[var(--text-muted)] text-xs mt-1">Upload your ad image to a CDN or image host and paste the URL above.</p>
               </div>
             </div>
 

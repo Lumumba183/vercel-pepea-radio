@@ -84,12 +84,25 @@ export default function AdSpace({ position, className = '' }: AdSpaceProps) {
 }
 
 function AdImage({ ad, size }: { ad: Advertisement; size: any }) {
+  const [imgError, setImgError] = useState(false)
+  
+  if (imgError) {
+    return (
+      <div className={`${size.width} ${size.height} bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex flex-col items-center justify-center p-4`}>
+        <Megaphone size={32} className="text-blue-500 mb-2" />
+        <p className="text-blue-500 font-semibold text-sm text-center">{ad.title}</p>
+        <p className="text-[var(--text-muted)] text-xs text-center mt-1">Click to visit</p>
+      </div>
+    )
+  }
+
   return (
     <div className={`${size.width} ${size.height} overflow-hidden`}>
       <img
         src={ad.image_url}
         alt={ad.title}
         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        onError={() => setImgError(true)}
       />
     </div>
   )
