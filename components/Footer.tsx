@@ -10,7 +10,7 @@ export default function Footer() {
         <div>
           <h4 className="text-base font-bold mb-4 text-[var(--text)]">Pepea Radio</h4>
           <p className="text-[var(--text-muted)] text-[0.9375rem]">
-            Sauti Ya Afrika — Kenya&apos;s premier radio station delivering news, music, and community stories since 2018.
+            Sauti Ya Afrika — Kenya&apos;s premier radio station delivering news, music, and community stories since 2023.
           </p>
           <div className="flex gap-3 mt-4">
             <a href="#" aria-label="Facebook" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-blue-600 hover:text-white hover:border-blue-600">
@@ -25,7 +25,7 @@ export default function Footer() {
             <a href="#" aria-label="YouTube" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-red-600 hover:text-white hover:border-red-600">
               <Youtube size={16} />
             </a>
-            <a href="#" aria-label="WhatsApp" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-green-600 hover:text-white hover:border-green-600">
+            <a href="https://wa.me/254726639789" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-green-600 hover:text-white hover:border-green-600">
               <MessageCircle size={16} />
             </a>
           </div>
@@ -46,15 +46,15 @@ export default function Footer() {
           <Link href="/admin" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">Staff Login</Link>
         </div>
         <div>
-          <h4 className="text-base font-bold mb-4 text-[var(--text)]">Legal</h4>
-          <Link href="/privacy" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">Privacy Policy</Link>
-          <Link href="/terms" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">Terms of Service</Link>
-          <Link href="/cookies" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">Cookie Policy</Link>
+          <h4 className="text-base font-bold mb-4 text-[var(--text)]">Contact Us</h4>
+          <a href="tel:+254726846053" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">📞 +254 726 846 053</a>
+          <a href="https://wa.me/254726639789" target="_blank" rel="noopener noreferrer" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-green-600">💬 WhatsApp: +254 726 639 789</a>
+          <a href="mailto:info@pearadioke.com" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">📧 info@pearadioke.com</a>
           <p className="mt-4 text-[var(--text-muted)] text-sm">© 2026 Pepea Radio. All rights reserved.</p>
         </div>
       </div>
       <div className="max-w-[1400px] mx-auto border-t border-[var(--border)] pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p className="text-[var(--text-muted)] text-sm">Powered by NexaFlow Digital | +254 106 216 699 | support@wedialai.com</p>
+        <p className="text-[var(--text-muted)] text-sm">Powered by NexaFlow Digital | Pepea Radio — Sauti Ya Afrika</p>
         <div className="inline-flex items-center gap-1.5 bg-[rgba(220,38,38,0.15)] text-red-600 px-3 py-1.5 rounded-full text-xs font-bold uppercase border border-[rgba(220,38,38,0.3)] animate-[pulse-red_2s_infinite]">
           <span className="w-1.5 h-1.5 bg-red-600 rounded-full inline-block" />
           On Air 24/7

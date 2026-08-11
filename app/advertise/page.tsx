@@ -25,11 +25,15 @@ export default function AdvertisePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-[var(--text-muted)]">Email</p>
-              <p className="font-semibold">ads@pepea.radio</p>
+              <a href="mailto:info@pearadioke.com" className="font-semibold no-underline hover:text-blue-600 transition-colors">info@pearadioke.com</a>
             </div>
             <div>
               <p className="text-sm text-[var(--text-muted)]">Phone</p>
-              <p className="font-semibold">+254 106 216 699</p>
+              <a href="tel:+254726846053" className="font-semibold no-underline hover:text-blue-600 transition-colors">+254 726 846 053</a>
+            </div>
+            <div>
+              <p className="text-sm text-[var(--text-muted)]">WhatsApp</p>
+              <a href="https://wa.me/254726639789" target="_blank" rel="noopener noreferrer" className="font-semibold no-underline hover:text-green-600 transition-colors">+254 726 639 789</a>
             </div>
           </div>
         </div>

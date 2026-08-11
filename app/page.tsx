@@ -3,6 +3,7 @@ import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
 import BriefSlider from '@/components/BriefSlider'
 import AdSpace from '@/components/AdSpace'
+import RadioCard from '@/components/RadioCard'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Article } from '@/types'
@@ -82,8 +83,10 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            {/* Side News + Ad below */}
+            {/* Side News + Radio Card + Ad below */}
             <div className="space-y-4">
+              <RadioCard />
+
               <h3 className="text-lg font-bold text-[var(--text-muted)] uppercase tracking-wide">More News</h3>
               {sideArticles.map(article => (
                 <Link key={article.id} href={`/article/${article.id}`} className="group flex gap-4 no-underline bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 hover:border-blue-600 transition-all">
