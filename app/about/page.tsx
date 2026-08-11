@@ -67,7 +67,9 @@ export default function AboutPage() {
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center text-white font-bold text-sm">PM</div>
+                    <div className="w-10 h-10 rounded-full overflow-hidden border border-red-600/30">
+                      <img src="/peter-mukabi.jpg" alt="Peter Mukabi" className="w-full h-full object-cover" />
+                    </div>
                     <div>
                       <p className="font-semibold">Mr. Peter Mukabi</p>
                       <p className="text-sm text-[var(--text-muted)]">Director & Founder</p>
@@ -222,8 +224,12 @@ export default function AboutPage() {
               {/* Bio Card */}
               <div className="lg:col-span-1">
                 <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 text-center">
-                  <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center text-white font-black text-4xl mb-4">
-                    PM
+                  <div className="w-32 h-32 mx-auto rounded-full overflow-hidden mb-4 border-2 border-red-600/30">
+                    <img 
+                      src="/peter-mukabi.jpg" 
+                      alt="Peter Mukabi" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <h3 className="text-2xl font-bold mb-1">Peter Mukabi</h3>
                   <p className="text-[var(--text-muted)] text-sm mb-4">Director & Founder, Pepea Radio</p>
