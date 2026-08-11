@@ -41,9 +41,12 @@ export async function POST(req: NextRequest) {
         .eq('is_main_news', true)
     }
 
+    // Strip id if present (SERIAL auto-generates it)
+    const { id, ...insertData } = body
+
     const { data, error } = await supabaseAdmin
       .from('articles')
-      .insert(body)
+      .insert(insertData)
       .select()
       .single()
 
