@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Article } from '@/types'
 import { Newspaper, AlertTriangle } from 'lucide-react'
@@ -83,6 +83,20 @@ export default function BriefSlider() {
       })
   }, [])
 
+  // Compute shuffled items BEFORE any conditional returns (React hooks rule!)
+  const shuffledItems = (() => {
+    if (items.length <= 1) return items
+    const result = [...items]
+    for (let i = 1; i < result.length; i++) {
+      const prevTitle = (result[i-1].is_manual ? result[i-1].custom_title : result[i-1].articles?.title) || ''
+      const currTitle = (result[i].is_manual ? result[i].custom_title : result[i].articles?.title) || ''
+      if (prevTitle.slice(0, 20).toLowerCase() === currTitle.slice(0, 20).toLowerCase() && i < result.length - 1) {
+        [result[i], result[i+1]] = [result[i+1], result[i]]
+      }
+    }
+    return result
+  })()
+
   if (loading) {
     return (
       <div className="bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 border-b-2 border-yellow-600 py-3">
@@ -113,20 +127,6 @@ export default function BriefSlider() {
       </div>
     )
   }
-
-  // Shuffle items to avoid similar briefs being consecutive
-  const shuffledItems = useMemo(() => {
-    if (items.length <= 1) return items
-    const result = [...items]
-    for (let i = 1; i < result.length; i++) {
-      const prevTitle = (result[i-1].is_manual ? result[i-1].custom_title : result[i-1].articles?.title) || ''
-      const currTitle = (result[i].is_manual ? result[i].custom_title : result[i].articles?.title) || ''
-      if (prevTitle.slice(0, 20).toLowerCase() === currTitle.slice(0, 20).toLowerCase() && i < result.length - 1) {
-        [result[i], result[i+1]] = [result[i+1], result[i]]
-      }
-    }
-    return result
-  }, [items])
 
   // For seamless infinite scroll, duplicate shuffled items ONCE (2x total)
   const marqueeItems = [...shuffledItems, ...shuffledItems]
