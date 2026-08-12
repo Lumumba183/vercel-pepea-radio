@@ -162,11 +162,11 @@ export default async function HomePage() {
                   </div>
                 </Link>
               ))}
-              {/* Upcoming Event — Radio Station Announcements */}
-              <UpcomingEvent />
-              
-              {/* Ad Space below articles */}
+              {/* Ad Space — Paid client ads */}
               <AdSpace position="sidebar" />
+
+              {/* Upcoming Event — Radio Station Announcements (below paid ads) */}
+              <UpcomingEvent />
             </div>
           </div>
         )}

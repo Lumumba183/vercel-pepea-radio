@@ -87,8 +87,8 @@ export default function UpcomingEvent() {
         </div>
         <div className="absolute inset-0 bg-red-600/0 group-hover:bg-red-600/10 transition-colors" />
       </Link>
-      <p className="text-[var(--text-muted)] text-xs mt-2 text-center">
-        Post an event from the admin panel
+      <p className="text-[var(--text-muted)] text-xs mt-2 text-center opacity-0">
+        {' '}
       </p>
     </div>
   )
