@@ -32,11 +32,14 @@ export default async function HomePage() {
   const articles = await getArticles()
 
   const mainNews = articles.find(a => a.is_main_news) || articles[0]
-  // Featured: use explicitly featured articles, or fallback to latest 6 (excluding main)
-  const featuredArticles = articles.filter(a => a.featured && a.id !== mainNews?.id).slice(0, 6)
-  const effectiveFeatured = featuredArticles.length > 0 ? featuredArticles : articles.filter(a => a.id !== mainNews?.id).slice(0, 6)
-  // Side articles: exclude main news and featured (or the ones already shown)
-  const shownIds = new Set([mainNews?.id, ...effectiveFeatured.map(a => a.id)])
+  // Get 3 recent articles for below-main-news section (queue: new pushes old down)
+  const belowMainArticles = articles.filter(a => a.id !== mainNews?.id).slice(0, 3)
+  // Featured: use explicitly featured articles, or fallback to latest (excluding main + below-main)
+  const belowMainIds = new Set(belowMainArticles.map(a => a.id))
+  const featuredArticles = articles.filter(a => a.featured && a.id !== mainNews?.id && !belowMainIds.has(a.id)).slice(0, 6)
+  const effectiveFeatured = featuredArticles.length > 0 ? featuredArticles : articles.filter(a => a.id !== mainNews?.id && !belowMainIds.has(a.id)).slice(0, 6)
+  // Side articles: exclude main, below-main, and featured
+  const shownIds = new Set([mainNews?.id, ...belowMainArticles.map(a => a.id), ...effectiveFeatured.map(a => a.id)])
   const sideArticles = articles.filter(a => !shownIds.has(a.id)).slice(0, 4)
 
   return (
@@ -53,7 +56,7 @@ export default async function HomePage() {
         {mainNews && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
             {/* Main News - Large */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 flex flex-col gap-4">
               <Link href={`/article/${mainNews.id}`} className="group block no-underline">
                 <div className="relative rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--card)]">
                   <div className="relative aspect-[16/10] overflow-hidden">
@@ -95,6 +98,40 @@ export default async function HomePage() {
                   </div>
                 </div>
               </Link>
+
+              {/* 3 Article Rows Below Main News */}
+              {belowMainArticles.length > 0 && (
+                <div className="flex flex-col gap-3">
+                  {belowMainArticles.map((article, idx) => (
+                    <Link 
+                      key={article.id} 
+                      href={`/article/${article.id}`} 
+                      className="group flex gap-4 no-underline bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 hover:border-blue-600 transition-all"
+                    >
+                      <div className="w-28 h-20 shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[var(--bg-light)] to-[var(--card)]">
+                        {article.image_url ? (
+                          <img src={article.image_url} alt="" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--text-muted)]">
+                              <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 flex flex-col justify-center">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[0.65rem] font-bold text-blue-600 uppercase">{article.category}</span>
+                          <span className="text-[0.65rem] text-[var(--text-muted)]">{formatDate(article.date, article.created_at)}</span>
+                        </div>
+                        <h4 className="font-bold text-[var(--text)] text-sm leading-snug group-hover:text-blue-400 transition-colors line-clamp-2">
+                          {article.title}
+                        </h4>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Side News + Radio Card + Ad below */}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { Article } from '@/types'
 import { Newspaper, AlertTriangle } from 'lucide-react'
@@ -114,10 +114,24 @@ export default function BriefSlider() {
     )
   }
 
-  // For seamless infinite scroll, duplicate items ONCE (2x total)
-  // Animation scrolls from 0% to -50%, then resets — user never sees the jump
-  const marqueeItems = [...items, ...items]
-  const duration = Math.max(30, items.length * 6) // 6 seconds per item, minimum 30s
+  // For sequential scroll (1→5 then restart), no duplication
+  // Shuffle items to avoid similar briefs being consecutive
+  const shuffledItems = useMemo(() => {
+    if (items.length <= 1) return items
+    // Simple shuffle that prevents same-title items from being adjacent
+    const result = [...items]
+    for (let i = 1; i < result.length; i++) {
+      const prevTitle = (result[i-1].is_manual ? result[i-1].custom_title : result[i-1].articles?.title) || ''
+      const currTitle = (result[i].is_manual ? result[i].custom_title : result[i].articles?.title) || ''
+      // If current and previous are too similar, try to swap with next
+      if (prevTitle.slice(0, 20).toLowerCase() === currTitle.slice(0, 20).toLowerCase() && i < result.length - 1) {
+        [result[i], result[i+1]] = [result[i+1], result[i]]
+      }
+    }
+    return result
+  }, [items])
+
+  const duration = Math.max(20, shuffledItems.length * 5) // 5 seconds per item, minimum 20s
 
   return (
     <div 
@@ -135,7 +149,7 @@ export default function BriefSlider() {
           <span>Latest</span>
         </div>
 
-        {/* Desktop: Scrolling Marquee */}
+        {/* Desktop: Sequential Scrolling Marquee (1→5, then restart) */}
         <div className="hidden md:flex flex-1 overflow-hidden">
           <div 
             className="flex whitespace-nowrap"
@@ -144,7 +158,7 @@ export default function BriefSlider() {
               animationPlayState: isHovered ? 'paused' : 'running',
             }}
           >
-            {marqueeItems.map((item, index) => {
+            {shuffledItems.map((item, index) => {
               const title = item.is_manual ? item.custom_title : item.articles?.title
               const excerpt = item.is_manual ? item.custom_excerpt : item.articles?.excerpt
               const linkId = item.is_manual ? null : item.article_id

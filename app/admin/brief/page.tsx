@@ -25,6 +25,8 @@ export default function BriefPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ article_id: '' as string | number, custom_title: '', custom_excerpt: '', is_manual: false })
 
+  const [autoFilling, setAutoFilling] = useState(false)
+
   useEffect(() => {
     if (!isLoaded) return
     if (!user) { setLoading(false); return }
@@ -70,16 +72,39 @@ export default function BriefPage() {
   }
 
   const autoFill = async () => {
-    const latest = articles.slice(0, 5)
-    for (let i = 0; i < latest.length; i++) {
-      await fetch('/api/brief', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ article_id: latest[i].id, position: i + 1, is_manual: false, custom_title: null, custom_excerpt: null }),
-      })
+    if (autoFilling) return
+    setAutoFilling(true)
+    try {
+      // Step 1: Delete all existing brief items
+      for (const item of briefItems) {
+        await fetch(`/api/brief?id=${item.id}`, { method: 'DELETE' })
+      }
+      
+      // Step 2: Add latest 5 articles
+      const latest = articles.slice(0, 5)
+      for (let i = 0; i < latest.length; i++) {
+        await fetch('/api/brief', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            article_id: latest[i].id, 
+            position: i + 1, 
+            is_manual: false, 
+            custom_title: null, 
+            custom_excerpt: null 
+          }),
+        })
+      }
+      
+      // Step 3: Refresh
+      const res = await fetch('/api/brief')
+      setBriefItems(await res.json())
+      alert(`Auto-filled with ${latest.length} latest articles!`)
+    } catch (err: any) {
+      alert('Auto-fill failed: ' + err.message)
+    } finally {
+      setAutoFilling(false)
     }
-    const res = await fetch('/api/brief')
-    setBriefItems(await res.json())
   }
 
   if (!isLoaded || loading) {
@@ -115,8 +140,13 @@ export default function BriefPage() {
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
           <p className="text-[var(--text-muted)]">Manage the scrolling Brief bar on the homepage. Auto-fills from the 5 latest articles.</p>
           <div className="flex gap-2">
-            <button onClick={autoFill} className="px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-sm font-medium cursor-pointer hover:bg-[var(--card-hover)] transition-all flex items-center gap-2">
-              <RefreshCw size={14} /> Auto-Fill Latest 5
+            <button 
+              onClick={autoFill} 
+              disabled={autoFilling}
+              className="px-4 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)] text-sm font-medium cursor-pointer hover:bg-[var(--card-hover)] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw size={14} className={autoFilling ? 'animate-spin' : ''} /> 
+              {autoFilling ? 'Filling...' : 'Auto-Fill Latest 5'}
             </button>
             <button onClick={() => setShowForm(true)} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium cursor-pointer hover:bg-blue-700 transition-all flex items-center gap-2">
               <Plus size={16} /> Add Manual
