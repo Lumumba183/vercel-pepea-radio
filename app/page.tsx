@@ -10,6 +10,10 @@ import { supabase } from '@/lib/supabase'
 import { Article } from '@/types'
 import { Play, Newspaper, Tv, FileText, Clock, User } from 'lucide-react'
 
+// Force fresh data on every request — no caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 function formatDate(dateStr: string | undefined | null, createdAt?: string | undefined | null): string {
   const d = dateStr || createdAt
   if (!d) return ''
