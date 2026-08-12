@@ -13,7 +13,7 @@ export default function Footer() {
             Sauti Ya Afrika — Kenya&apos;s premier radio station delivering news, music, and community stories since 2023.
           </p>
           <div className="flex gap-3 mt-4">
-            <a href="#" aria-label="Facebook" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-blue-600 hover:text-white hover:border-blue-600">
+            <a href="https://web.facebook.com/pepeafmradiokenya" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-blue-600 hover:text-white hover:border-blue-600">
               <Facebook size={16} />
             </a>
             <a href="#" aria-label="Twitter" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-blue-600 hover:text-white hover:border-blue-600">
@@ -22,7 +22,7 @@ export default function Footer() {
             <a href="#" aria-label="Instagram" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-pink-600 hover:text-white hover:border-pink-600">
               <Instagram size={16} />
             </a>
-            <a href="#" aria-label="YouTube" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-red-600 hover:text-white hover:border-red-600">
+            <a href="https://www.youtube.com/@pepearadioke" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-red-600 hover:text-white hover:border-red-600">
               <Youtube size={16} />
             </a>
             <a href="https://wa.me/254726639789" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="w-9 h-9 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] no-underline transition-all hover:bg-green-600 hover:text-white hover:border-green-600">

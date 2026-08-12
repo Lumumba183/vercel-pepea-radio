@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Megaphone, Plus, Trash2, Edit2, X, Calendar, Eye, EyeOff } from 'lucide-react'
+import Header from '@/components/Header'
+import { Megaphone, Plus, Trash2, Edit2, X, Calendar, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 
 interface Advertisement {
   id: number
@@ -126,7 +127,16 @@ export default function AdminAdsPage() {
   }
 
   return (
-    <div className="max-w-[1200px] mx-auto px-6 py-8">
+    <>
+      <Header />
+      <main className="min-h-screen bg-[var(--bg)]">
+        <div className="flex items-center gap-4 px-6 py-4 border-b border-[var(--border)]">
+          <a href="/admin" className="text-[var(--text-muted)] no-underline hover:text-[var(--text)]">
+            <ArrowLeft size={20} />
+          </a>
+          <h2 className="text-2xl font-black">Ads Management</h2>
+        </div>
+        <div className="max-w-[1200px] mx-auto px-6 py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-extrabold flex items-center gap-3">
@@ -369,6 +379,8 @@ export default function AdminAdsPage() {
         </div>
       </div>
     </div>
+      </main>
+    </>
   )
 }
 
