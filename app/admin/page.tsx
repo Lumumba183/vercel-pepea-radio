@@ -132,7 +132,11 @@ export default function AdminPage() {
         {/* Main Content */}
         <main className="flex-1 lg:ml-64 p-6 lg:p-8 mt-12 lg:mt-0">
           {activeTab === 'dashboard' && <DashboardTab articles={articles} schedule={schedule} reports={reports} analytics={analytics} />}
-          {activeTab === 'articles' && <ArticlesTab articles={articles} onRefresh={() => fetch('/api/articles').then(r => r.json()).then(setArticles)} />}
+          {activeTab === 'articles' && <ArticlesTab articles={articles} onRefresh={async () => {
+            const res = await fetch(`/api/articles?_=${Date.now()}`)
+            const data = await res.json()
+            setArticles(data)
+          }} />}
           {activeTab === 'schedule' && <ScheduleTab schedule={schedule} onRefresh={() => fetch('/api/schedule').then(r => r.json()).then(setSchedule)} />}
           {activeTab === 'reports' && <ReportsTab reports={reports} onRefresh={() => fetch('/api/reports').then(r => r.json()).then(setReports)} />}
           {activeTab === 'users' && <UsersRedirect />}
@@ -212,6 +216,7 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
   const [uploading, setUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [togglingId, setTogglingId] = useState<number | null>(null)
 
   const openNew = () => {
     const today = new Date().toISOString().split('T')[0]
@@ -405,17 +410,19 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
                   <div className="flex flex-col gap-1">
                     <button
                       onClick={() => toggleMain(a)}
-                      className={`text-xs px-2 py-1 rounded-full cursor-pointer transition-all ${a.is_main_news ? 'bg-yellow-500 text-black font-bold' : 'bg-[var(--bg)] border border-[var(--border)] hover:bg-yellow-500/20'}`}
+                      disabled={togglingId === a.id}
+                      className={`text-xs px-2 py-1 rounded-full cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed ${a.is_main_news ? 'bg-yellow-500 text-black font-bold' : 'bg-[var(--bg)] border border-[var(--border)] hover:bg-yellow-500/20'}`}
                       title={a.is_main_news ? 'Currently MAIN news — click to unset' : 'Set as MAIN news'}
                     >
-                      {a.is_main_news ? '★ MAIN' : '☆ Set Main'}
+                      {togglingId === a.id ? '⏳ Updating...' : a.is_main_news ? '★ MAIN' : '☆ Set Main'}
                     </button>
                     <button
                       onClick={() => toggleFeatured(a)}
-                      className={`text-xs px-2 py-1 rounded-full cursor-pointer transition-all ${a.featured ? 'bg-blue-600 text-white font-bold' : 'bg-[var(--bg)] border border-[var(--border)] hover:bg-blue-600/20'}`}
+                      disabled={togglingId === a.id}
+                      className={`text-xs px-2 py-1 rounded-full cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed ${a.featured ? 'bg-blue-600 text-white font-bold' : 'bg-[var(--bg)] border border-[var(--border)] hover:bg-blue-600/20'}`}
                       title={a.featured ? 'Currently featured — click to unfeature' : 'Feature on homepage'}
                     >
-                      {a.featured ? '✓ Featured' : '☐ Feature'}
+                      {togglingId === a.id ? '⏳ Updating...' : a.featured ? '✓ Featured' : '☐ Feature'}
                     </button>
                   </div>
                 </td>
@@ -436,6 +443,7 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
   )
 
   async function toggleMain(a: Article) {
+    setTogglingId(a.id)
     const newValue = !a.is_main_news
     try {
       const res = await fetch('/api/articles', {
@@ -446,15 +454,20 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
       const data = await res.json()
       if (!res.ok) {
         alert(`Error: ${data.error || 'Failed to update'}`)
+        setTogglingId(null)
         return
       }
-      onRefresh()
+      await onRefresh()
+      // Small delay to let user see the change
+      setTimeout(() => setTogglingId(null), 300)
     } catch (err: any) {
       alert(`Error: ${err.message || 'Failed to update'}`)
+      setTogglingId(null)
     }
   }
 
   async function toggleFeatured(a: Article) {
+    setTogglingId(a.id)
     const newValue = !a.featured
     try {
       const res = await fetch('/api/articles', {
@@ -465,11 +478,14 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
       const data = await res.json()
       if (!res.ok) {
         alert(`Error: ${data.error || 'Failed to update'}`)
+        setTogglingId(null)
         return
       }
-      onRefresh()
+      await onRefresh()
+      setTimeout(() => setTogglingId(null), 300)
     } catch (err: any) {
       alert(`Error: ${err.message || 'Failed to update'}`)
+      setTogglingId(null)
     }
   }
 }

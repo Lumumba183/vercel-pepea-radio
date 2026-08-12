@@ -2,6 +2,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
 import { supabase } from '@/lib/supabase'
+import { headers } from 'next/headers'
 import { Play, Youtube, Twitch } from 'lucide-react'
 
 async function getSettings() {
@@ -15,6 +16,8 @@ async function getSettings() {
 
 export default async function TvPage() {
   const settings = await getSettings()
+  const headersList = await headers()
+  const host = headersList.get('host') || 'vercel-pepea-radio.vercel.app'
 
   return (
     <>
@@ -39,7 +42,7 @@ export default async function TvPage() {
             <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4">
               <iframe
                 className="w-full h-full"
-                src={`https://player.twitch.tv/?channel=${settings.twitch_channel}&parent=pepea-radio.vercel.app`}
+                src={`https://player.twitch.tv/?channel=${settings.twitch_channel}&parent=${host}`}}
                 title="Twitch Live"
                 allowFullScreen
               />
