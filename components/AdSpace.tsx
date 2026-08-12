@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Megaphone, Calendar, X, Eye } from 'lucide-react'
+import { Megaphone } from 'lucide-react'
 
 interface Advertisement {
   id: number
@@ -34,12 +34,6 @@ export default function AdSpace({ position, className = '' }: AdSpaceProps) {
       .catch(() => setLoading(false))
   }, [position])
 
-  const positionLabels: Record<string, string> = {
-    'sidebar': 'Sidebar Banner',
-    'bottom-left': 'Bottom Banner Left',
-    'bottom-right': 'Bottom Banner Right'
-  }
-
   const positionSizes: Record<string, { width: string; height: string; aspect: string }> = {
     'sidebar': { width: 'w-full', height: 'h-[300px]', aspect: 'aspect-[3/4]' },
     'bottom-left': { width: 'w-full', height: 'h-[200px]', aspect: 'aspect-[21/9]' },
@@ -57,7 +51,7 @@ export default function AdSpace({ position, className = '' }: AdSpaceProps) {
   // Show active ad
   if (ad) {
     const isExpired = new Date(ad.expires_at) < new Date()
-    if (isExpired) return <BookThisSpace position={position} size={size} className={className} />
+    if (isExpired) return <PlaceholderAd position={position} size={size} className={className} />
 
     return (
       <div className={`${size.width} ${className}`}>
@@ -79,8 +73,8 @@ export default function AdSpace({ position, className = '' }: AdSpaceProps) {
     )
   }
 
-  // Show "Book This Space" placeholder
-  return <BookThisSpace position={position} size={size} className={className} />
+  // Show placeholder ad image when no active ad
+  return <PlaceholderAd position={position} size={size} className={className} />
 }
 
 function AdImage({ ad, size }: { ad: Advertisement; size: any }) {
@@ -108,42 +102,39 @@ function AdImage({ ad, size }: { ad: Advertisement; size: any }) {
   )
 }
 
-function BookThisSpace({ position, size, className }: { position: string; size: any; className?: string }) {
-  const positionLabels: Record<string, string> = {
-    'sidebar': 'Sidebar Banner',
-    'bottom-left': 'Bottom Banner (Left)',
-    'bottom-right': 'Bottom Banner (Right)'
+function PlaceholderAd({ position, size, className }: { position: string; size: any; className?: string }) {
+  // Map positions to placeholder images
+  const placeholderImages: Record<string, string> = {
+    'sidebar': '/ad-placeholder-sidebar.jpg',       // 300×600 vertical
+    'bottom-left': '/ad-placeholder-bottom.jpg',    // 800×200 horizontal
+    'bottom-right': '/ad-placeholder-bottom.jpg'    // 800×200 horizontal
   }
 
-  const positionSpecs: Record<string, { size: string; pixels: string }> = {
-    'sidebar': { size: '300 × 600 px', pixels: 'Portrait / Vertical' },
-    'bottom-left': { size: '800 × 200 px', pixels: 'Landscape / Horizontal' },
-    'bottom-right': { size: '800 × 200 px', pixels: 'Landscape / Horizontal' }
+  const positionSpecs: Record<string, { size: string; pixels: string; price: string }> = {
+    'sidebar': { size: '300 × 600 px', pixels: 'Portrait / Vertical', price: 'KES 10,000/week' },
+    'bottom-left': { size: '800 × 200 px', pixels: 'Landscape / Horizontal', price: 'KES 8,000/week' },
+    'bottom-right': { size: '800 × 200 px', pixels: 'Landscape / Horizontal', price: 'KES 8,000/week' }
   }
 
+  const imageSrc = placeholderImages[position]
   const spec = positionSpecs[position]
 
   return (
     <div className={`${size.width} ${className}`}>
       <Link 
         href={`/book-space?position=${position}`}
-        className="block relative overflow-hidden rounded-xl border-2 border-dashed border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--bg-light)] hover:border-blue-600 hover:bg-[var(--card-hover)] transition-all group"
+        className="block relative overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-blue-600 transition-all group"
+        title={`Advertise here — ${spec.price}`}
       >
-        <div className={`${size.width} ${size.height} flex flex-col items-center justify-center p-4 text-center`}>
-          <div className="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center mb-3 group-hover:bg-blue-600/30 transition-colors">
-            <Megaphone size={24} className="text-blue-500" />
-          </div>
-          <h4 className="font-bold text-[var(--text)] text-sm mb-1">Book This Space</h4>
-          <p className="text-[var(--text-muted)] text-xs mb-1">{positionLabels[position]}</p>
-          <p className="text-blue-500 text-[10px] font-semibold mb-3">{spec.size} • {spec.pixels}</p>
-          <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-600 text-white text-xs font-semibold group-hover:bg-blue-500 transition-colors">
-            <Eye size={12} />
-            Advertise Here
-          </span>
+        <div className={`${size.width} ${size.height} overflow-hidden`}>
+          <img
+            src={imageSrc}
+            alt={`Advertise here — ${spec.size} • ${spec.pixels}`}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
         </div>
-        
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+        {/* Subtle hover overlay */}
+        <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors" />
       </Link>
     </div>
   )
