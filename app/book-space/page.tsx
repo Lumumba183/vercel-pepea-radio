@@ -23,9 +23,30 @@ function BookSpaceForm() {
   const [error, setError] = useState('')
 
   const positions = [
-    { value: 'sidebar', label: 'Sidebar Banner', price: 'KES 10,000/week', size: '300 × 600 pixels', orientation: 'Portrait (vertical)' },
-    { value: 'bottom-left', label: 'Bottom Banner (Left)', price: 'KES 8,000/week', size: '800 × 200 pixels', orientation: 'Landscape (horizontal)' },
-    { value: 'bottom-right', label: 'Bottom Banner (Right)', price: 'KES 8,000/week', size: '800 × 200 pixels', orientation: 'Landscape (horizontal)' }
+    { 
+      value: 'sidebar', 
+      label: 'Sidebar Banner', 
+      price: 'KES 10,000/week', 
+      size: '300 × 600 pixels', 
+      orientation: 'Portrait (vertical)',
+      uploadSpecs: 'Width: 840 px • Height: 600 px • Aspect ratio: 4:3 (landscape/wide rectangle)'
+    },
+    { 
+      value: 'bottom-left', 
+      label: 'Bottom Banner (Left)', 
+      price: 'KES 8,000/week', 
+      size: '800 × 200 pixels', 
+      orientation: 'Landscape (horizontal)',
+      uploadSpecs: 'Width: 1000 px • Height: 400 px • Aspect ratio: 5:2 (wide banner)'
+    },
+    { 
+      value: 'bottom-right', 
+      label: 'Bottom Banner (Right)', 
+      price: 'KES 8,000/week', 
+      size: '800 × 200 pixels', 
+      orientation: 'Landscape (horizontal)',
+      uploadSpecs: 'Width: 1000 px • Height: 400 px • Aspect ratio: 5:2 (wide banner)'
+    }
   ]
 
   async function handleSubmit(e: React.FormEvent) {
@@ -111,14 +132,18 @@ function BookSpaceForm() {
               <p className="font-semibold text-sm">{pos.label}</p>
               <p className="text-blue-500 font-bold">{pos.price}</p>
               <p className="text-[var(--text-muted)] text-xs mt-1">{pos.size} • {pos.orientation}</p>
+              <div className="mt-2 p-2 bg-blue-600/10 border border-blue-600/20 rounded-md">
+                <p className="text-blue-400 text-[10px] font-semibold">📐 UPLOAD SPECS</p>
+                <p className="text-[var(--text-muted)] text-[10px] mt-0.5">{pos.uploadSpecs}</p>
+              </div>
             </div>
           ))}
         </div>
         <div className="mt-4 p-3 bg-yellow-600/10 border border-yellow-600/30 rounded-lg">
           <p className="text-yellow-400 text-sm font-semibold">📐 Ad Image Requirements</p>
           <p className="text-[var(--text-muted)] text-xs mt-1">
-            Please provide your ad in the exact pixel dimensions listed above. Accepted formats: JPG, PNG. 
-            Max file size: 2MB. If you need help designing your ad, mention it in your message.
+            Please provide your ad in the exact pixel dimensions listed in the "UPLOAD SPECS" box above for your chosen position. 
+            Accepted formats: JPG, PNG. Max file size: 2MB. If you need help designing your ad, mention it in your message.
           </p>
         </div>
       </div>
