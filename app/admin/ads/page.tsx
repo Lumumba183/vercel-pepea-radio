@@ -115,7 +115,8 @@ export default function AdminAdsPage() {
   const positions = [
     { value: 'sidebar', label: 'Sidebar Banner', size: '300 × 600 px' },
     { value: 'bottom-left', label: 'Bottom Banner Left', size: '800 × 200 px' },
-    { value: 'bottom-right', label: 'Bottom Banner Right', size: '800 × 200 px' }
+    { value: 'bottom-right', label: 'Bottom Banner Right', size: '800 × 200 px' },
+    { value: 'upcoming-event', label: 'Radio Upcoming Event', size: 'Sidebar event slot' }
   ]
 
   if (loading) {
@@ -246,6 +247,24 @@ export default function AdminAdsPage() {
                   className="w-5 h-5 rounded border-[var(--border)]"
                 />
                 <span className="font-semibold">Active</span>
+              </label>
+            </div>
+
+            <div className="md:col-span-2 p-4 bg-red-600/10 border border-red-600/30 rounded-xl">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.position === 'upcoming-event'}
+                  onChange={e => setForm({ ...form, position: e.target.checked ? 'upcoming-event' : 'sidebar' })}
+                  className="w-5 h-5 rounded border-[var(--border)]"
+                />
+                <div>
+                  <span className="font-semibold text-red-400">Radio Upcoming Event</span>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    Check this box if this is a radio station upcoming event (interview, show, etc.). 
+                    It will appear in the &quot;Upcoming Event&quot; sidebar section instead of regular ad slots.
+                  </p>
+                </div>
               </label>
             </div>
 

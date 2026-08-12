@@ -4,6 +4,7 @@ import PlayerBar from '@/components/PlayerBar'
 import BriefSlider from '@/components/BriefSlider'
 import AdSpace from '@/components/AdSpace'
 import RadioCard from '@/components/RadioCard'
+import UpcomingEvent from '@/components/UpcomingEvent'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Article } from '@/types'
@@ -161,6 +162,9 @@ export default async function HomePage() {
                   </div>
                 </Link>
               ))}
+              {/* Upcoming Event — Radio Station Announcements */}
+              <UpcomingEvent />
+              
               {/* Ad Space below articles */}
               <AdSpace position="sidebar" />
             </div>
