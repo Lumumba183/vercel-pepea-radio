@@ -42,7 +42,7 @@ export default async function TvPage() {
             <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4">
               <iframe
                 className="w-full h-full"
-                src={`https://player.twitch.tv/?channel=${settings.twitch_channel}&parent=${host}`}}
+                src={`https://player.twitch.tv/?channel=${settings.twitch_channel}&parent=${host}`}
                 title="Twitch Live"
                 allowFullScreen
               />
