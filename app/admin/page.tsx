@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import Header from '@/components/Header'
@@ -30,6 +30,53 @@ export default function AdminPage() {
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+
+  const refreshArticles = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/articles?_=${Date.now()}`)
+      if (!res.ok) {
+        console.error('refreshArticles failed:', res.status, await res.text())
+        return
+      }
+      const data = await res.json()
+      if (!Array.isArray(data)) {
+        console.error('refreshArticles: expected array, got:', typeof data, data)
+        return
+      }
+      setArticles(data)
+      setLastUpdated(new Date())
+    } catch (err) {
+      console.error('refreshArticles error:', err)
+    }
+  }, [])
+
+  const refreshSchedule = useCallback(async () => {
+    try {
+      const res = await fetch('/api/schedule')
+      if (!res.ok) return
+      const data = await res.json()
+      if (Array.isArray(data)) setSchedule(data)
+    } catch (err) { console.error('refreshSchedule error:', err) }
+  }, [])
+
+  const refreshReports = useCallback(async () => {
+    try {
+      const res = await fetch('/api/reports')
+      if (!res.ok) return
+      const data = await res.json()
+      if (Array.isArray(data)) setReports(data)
+    } catch (err) { console.error('refreshReports error:', err) }
+  }, [])
+
+  const refreshAnalytics = useCallback(async () => {
+    try {
+      const res = await fetch('/api/analytics')
+      if (!res.ok) return
+      const data = await res.json()
+      setAnalytics(data)
+    } catch (err) { console.error('refreshAnalytics error:', err) }
+  }, [])
 
   useEffect(() => {
     if (!isLoaded) return
@@ -45,11 +92,11 @@ export default function AdminPage() {
       })
       .catch(() => setLoading(false))
 
-    fetch('/api/articles').then(r => r.json()).then(setArticles)
-    fetch('/api/schedule').then(r => r.json()).then(setSchedule)
-    fetch('/api/reports').then(r => r.json()).then(setReports)
-    fetch('/api/analytics').then(r => r.json()).then(setAnalytics)
-  }, [isLoaded, user])
+    refreshArticles()
+    refreshSchedule()
+    refreshReports()
+    refreshAnalytics()
+  }, [isLoaded, user, refreshArticles, refreshSchedule, refreshReports, refreshAnalytics])
 
   if (!isLoaded || loading) {
     return (
@@ -132,11 +179,7 @@ export default function AdminPage() {
         {/* Main Content */}
         <main className="flex-1 lg:ml-64 p-6 lg:p-8 mt-12 lg:mt-0">
           {activeTab === 'dashboard' && <DashboardTab articles={articles} schedule={schedule} reports={reports} analytics={analytics} />}
-          {activeTab === 'articles' && <ArticlesTab articles={articles} onRefresh={async () => {
-            const res = await fetch(`/api/articles?_=${Date.now()}`)
-            const data = await res.json()
-            setArticles(data)
-          }} />}
+          {activeTab === 'articles' && <ArticlesTab articles={articles} onRefresh={refreshArticles} lastUpdated={lastUpdated} />}
           {activeTab === 'schedule' && <ScheduleTab schedule={schedule} onRefresh={() => fetch('/api/schedule').then(r => r.json()).then(setSchedule)} />}
           {activeTab === 'reports' && <ReportsTab reports={reports} onRefresh={() => fetch('/api/reports').then(r => r.json()).then(setReports)} />}
           {activeTab === 'users' && <UsersRedirect />}
@@ -210,13 +253,19 @@ function DashboardTab({ articles, schedule, reports, analytics }: { articles: Ar
   )
 }
 
-function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: () => void }) {
+function ArticlesTab({ articles, onRefresh, lastUpdated }: { articles: Article[]; onRefresh: () => Promise<void>; lastUpdated: Date | null }) {
   const [editing, setEditing] = useState<Article | null>(null)
   const [form, setForm] = useState<Partial<Article>>({})
   const [uploading, setUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [togglingId, setTogglingId] = useState<number | null>(null)
+  const [feedback, setFeedback] = useState<{type: 'success'|'error', msg: string} | null>(null)
+
+  const showFeedback = (type: 'success'|'error', msg: string) => {
+    setFeedback({ type, msg })
+    setTimeout(() => setFeedback(null), 3000)
+  }
 
   const openNew = () => {
     const today = new Date().toISOString().split('T')[0]
@@ -300,8 +349,17 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
 
   return (
     <div>
+      {feedback && (
+        <div className={`mb-4 p-3 rounded-lg text-sm font-medium ${feedback.type === 'success' ? 'bg-green-600/20 text-green-400 border border-green-600/30' : 'bg-red-600/20 text-red-400 border border-red-600/30'}`}>
+          {feedback.msg}
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-extrabold">Articles</h2>
+        <div>
+          <h2 className="text-2xl font-extrabold">Articles</h2>
+          {lastUpdated && <p className="text-xs text-[var(--text-muted)] mt-1">Last refreshed: {lastUpdated.toLocaleTimeString()}</p>}
+        </div>
         <button onClick={openNew} className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium cursor-pointer hover:bg-blue-700 transition-all">+ New Article</button>
       </div>
 
@@ -443,6 +501,7 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
   )
 
   async function toggleMain(a: Article) {
+    console.log('[toggleMain] Starting for article', a.id, 'current:', a.is_main_news)
     setTogglingId(a.id)
     const newValue = !a.is_main_news
     try {
@@ -451,22 +510,26 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: a.id, is_main_news: newValue })
       })
+      console.log('[toggleMain] Response status:', res.status)
       const data = await res.json()
+      console.log('[toggleMain] Response data:', data)
       if (!res.ok) {
-        alert(`Error: ${data.error || 'Failed to update'}`)
+        showFeedback('error', data.error || 'Failed to update')
         setTogglingId(null)
         return
       }
+      showFeedback('success', newValue ? '✓ Set as MAIN news' : '✓ Removed from main news')
       await onRefresh()
-      // Small delay to let user see the change
-      setTimeout(() => setTogglingId(null), 300)
+      setTogglingId(null)
     } catch (err: any) {
-      alert(`Error: ${err.message || 'Failed to update'}`)
+      console.error('[toggleMain] Error:', err)
+      showFeedback('error', err.message || 'Failed to update')
       setTogglingId(null)
     }
   }
 
   async function toggleFeatured(a: Article) {
+    console.log('[toggleFeatured] Starting for article', a.id, 'current:', a.featured)
     setTogglingId(a.id)
     const newValue = !a.featured
     try {
@@ -475,16 +538,20 @@ function ArticlesTab({ articles, onRefresh }: { articles: Article[]; onRefresh: 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: a.id, featured: newValue })
       })
+      console.log('[toggleFeatured] Response status:', res.status)
       const data = await res.json()
+      console.log('[toggleFeatured] Response data:', data)
       if (!res.ok) {
-        alert(`Error: ${data.error || 'Failed to update'}`)
+        showFeedback('error', data.error || 'Failed to update')
         setTogglingId(null)
         return
       }
+      showFeedback('success', newValue ? '✓ Featured on homepage' : '✓ Removed from featured')
       await onRefresh()
-      setTimeout(() => setTogglingId(null), 300)
+      setTogglingId(null)
     } catch (err: any) {
-      alert(`Error: ${err.message || 'Failed to update'}`)
+      console.error('[toggleFeatured] Error:', err)
+      showFeedback('error', err.message || 'Failed to update')
       setTogglingId(null)
     }
   }

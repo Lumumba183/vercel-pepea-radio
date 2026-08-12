@@ -65,20 +65,27 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
+    console.log('[API PUT /articles] body:', JSON.stringify(body))
     const { id, ...update } = body
 
     if (id === undefined || id === null || id === '') {
+      console.error('[API PUT /articles] Missing ID')
       return NextResponse.json({ error: 'Article ID is required' }, { status: 400 })
     }
 
     // If setting as main news, unset any existing main news
     if (update.is_main_news === true) {
-      await supabaseAdmin
+      console.log('[API PUT /articles] Unsetting existing main news...')
+      const { error: unsetError } = await supabaseAdmin
         .from('articles')
         .update({ is_main_news: false })
         .eq('is_main_news', true)
+      if (unsetError) {
+        console.error('[API PUT /articles] Unset error:', unsetError)
+      }
     }
 
+    console.log('[API PUT /articles] Updating article', id, 'with:', JSON.stringify(update))
     const { data, error } = await supabaseAdmin
       .from('articles')
       .update(update)
@@ -87,13 +94,14 @@ export async function PUT(req: NextRequest) {
       .single()
 
     if (error) {
-      console.error('PUT article error:', error)
+      console.error('[API PUT /articles] Update error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    console.log('[API PUT /articles] Success:', data)
     return NextResponse.json(data)
   } catch (err: any) {
-    console.error('PUT article unexpected error:', err)
+    console.error('[API PUT /articles] Unexpected error:', err)
     return NextResponse.json({ error: err.message || 'Failed to update article' }, { status: 500 })
   }
 }
