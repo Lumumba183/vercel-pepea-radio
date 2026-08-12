@@ -114,16 +114,13 @@ export default function BriefSlider() {
     )
   }
 
-  // For sequential scroll (1→5 then restart), no duplication
   // Shuffle items to avoid similar briefs being consecutive
   const shuffledItems = useMemo(() => {
     if (items.length <= 1) return items
-    // Simple shuffle that prevents same-title items from being adjacent
     const result = [...items]
     for (let i = 1; i < result.length; i++) {
       const prevTitle = (result[i-1].is_manual ? result[i-1].custom_title : result[i-1].articles?.title) || ''
       const currTitle = (result[i].is_manual ? result[i].custom_title : result[i].articles?.title) || ''
-      // If current and previous are too similar, try to swap with next
       if (prevTitle.slice(0, 20).toLowerCase() === currTitle.slice(0, 20).toLowerCase() && i < result.length - 1) {
         [result[i], result[i+1]] = [result[i+1], result[i]]
       }
@@ -131,7 +128,9 @@ export default function BriefSlider() {
     return result
   }, [items])
 
-  const duration = Math.max(20, shuffledItems.length * 5) // 5 seconds per item, minimum 20s
+  // For seamless infinite scroll, duplicate shuffled items ONCE (2x total)
+  const marqueeItems = [...shuffledItems, ...shuffledItems]
+  const duration = Math.max(25, shuffledItems.length * 5) // 5 seconds per item
 
   return (
     <div 
@@ -149,8 +148,8 @@ export default function BriefSlider() {
           <span>Latest</span>
         </div>
 
-        {/* Desktop: Sequential Scrolling Marquee (1→5, then restart) */}
-        <div className="hidden md:flex flex-1 overflow-hidden">
+        {/* Scrolling Marquee — Desktop & Mobile */}
+        <div className="flex flex-1 overflow-hidden">
           <div 
             className="flex whitespace-nowrap"
             style={{
@@ -158,59 +157,36 @@ export default function BriefSlider() {
               animationPlayState: isHovered ? 'paused' : 'running',
             }}
           >
-            {shuffledItems.map((item, index) => {
+            {marqueeItems.map((item, index) => {
               const title = item.is_manual ? item.custom_title : item.articles?.title
               const excerpt = item.is_manual ? item.custom_excerpt : item.articles?.excerpt
               const linkId = item.is_manual ? null : item.article_id
 
               return (
-                <span key={`${item.id}-${index}`} className="inline-flex items-center mx-8">
-                  <span className="w-2 h-2 bg-red-600 rounded-full mr-3 shrink-0" />
+                <span key={`${item.id}-${index}`} className="inline-flex items-center mx-4 md:mx-8">
+                  <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-red-600 rounded-full mr-2 md:mr-3 shrink-0" />
                   {linkId ? (
                     <Link
                       href={`/article/${linkId}`}
-                      className="text-black font-semibold no-underline hover:text-red-700 transition-colors"
+                      className="text-black text-sm md:text-base font-semibold no-underline hover:text-red-700 transition-colors"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {title}
                       {excerpt && (
-                        <span className="text-black/60 ml-2 font-normal">
-                          — {excerpt.slice(0, 50)}...
+                        <span className="text-black/60 ml-2 font-normal hidden md:inline">
+                          — {excerpt.slice(0, 40)}...
                         </span>
                       )}
                     </Link>
                   ) : (
-                    <span className="text-black font-semibold">
+                    <span className="text-black text-sm md:text-base font-semibold">
                       {title}
                       {excerpt && (
-                        <span className="text-black/60 ml-2 font-normal">
-                          — {excerpt.slice(0, 50)}...
+                        <span className="text-black/60 ml-2 font-normal hidden md:inline">
+                          — {excerpt.slice(0, 40)}...
                         </span>
                       )}
                     </span>
-                  )}
-                </span>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Mobile: Static List (no scroll) */}
-        <div className="md:hidden flex-1">
-          <div className="flex flex-wrap gap-x-6 gap-y-1">
-            {items.slice(0, 4).map((item) => {
-              const title = item.is_manual ? item.custom_title : item.articles?.title
-              const linkId = item.is_manual ? null : item.article_id
-
-              return (
-                <span key={item.id} className="inline-flex items-center">
-                  <span className="w-1.5 h-1.5 bg-red-600 rounded-full mr-2 shrink-0" />
-                  {linkId ? (
-                    <Link href={`/article/${linkId}`} className="text-black text-sm font-medium no-underline hover:text-red-700 transition-colors">
-                      {title}
-                    </Link>
-                  ) : (
-                    <span className="text-black text-sm font-medium">{title}</span>
                   )}
                 </span>
               )
