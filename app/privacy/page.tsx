@@ -16,7 +16,7 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-bold text-[var(--text)]">Data Security</h2>
           <p>We implement appropriate security measures to protect your personal data from unauthorized access, alteration, or destruction.</p>
           <h2 className="text-xl font-bold text-[var(--text)]">Contact Us</h2>
-          <p>If you have any questions about this privacy policy, please contact us at <a href="mailto:info@pearadioke.com" className="text-blue-500 no-underline hover:underline">info@pearadioke.com</a>.</p>
+          <p>If you have any questions about this privacy policy, please contact us at <a href="mailto:info@pepearadioke.com" className="text-blue-500 no-underline hover:underline">info@pepearadioke.com</a>.</p>
         </div>
       </main>
       <Footer />

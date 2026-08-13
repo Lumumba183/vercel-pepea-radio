@@ -25,7 +25,7 @@ export default function AdvertisePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-[var(--text-muted)]">Email</p>
-              <a href="mailto:info@pearadioke.com" className="font-semibold no-underline hover:text-blue-600 transition-colors">info@pearadioke.com</a>
+              <a href="mailto:info@pepearadioke.com" className="font-semibold no-underline hover:text-blue-600 transition-colors">info@pepearadioke.com</a>
             </div>
             <div>
               <p className="text-sm text-[var(--text-muted)]">Phone</p>

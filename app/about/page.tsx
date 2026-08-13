@@ -381,9 +381,9 @@ export default function AboutPage() {
               <MessageCircle className="text-green-500" size={20} />
               <span className="font-semibold text-[var(--text)]">WhatsApp: +254 726 639 789</span>
             </a>
-            <a href="mailto:info@pearadioke.com" className="flex items-center justify-center gap-3 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 no-underline hover:border-blue-600 transition-all sm:col-span-2">
+            <a href="mailto:info@pepearadioke.com" className="flex items-center justify-center gap-3 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 no-underline hover:border-blue-600 transition-all sm:col-span-2">
               <Mail className="text-blue-600" size={20} />
-              <span className="font-semibold text-[var(--text)]">info@pearadioke.com</span>
+              <span className="font-semibold text-[var(--text)]">info@pepearadioke.com</span>
             </a>
           </div>
         </section>

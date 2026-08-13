@@ -49,7 +49,7 @@ export default function Footer() {
           <h4 className="text-base font-bold mb-4 text-[var(--text)]">Contact Us</h4>
           <a href="tel:+254726846053" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">📞 +254 726 846 053</a>
           <a href="https://wa.me/254726639789" target="_blank" rel="noopener noreferrer" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-green-600">💬 WhatsApp: +254 726 639 789</a>
-          <a href="mailto:info@pearadioke.com" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">📧 info@pearadioke.com</a>
+          <a href="mailto:info@pepearadioke.com" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">📧 info@pepearadioke.com</a>
           <p className="mt-4 text-[var(--text-muted)] text-sm">© 2026 Pepea Radio. All rights reserved.</p>
         </div>
       </div>
