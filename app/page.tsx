@@ -5,6 +5,7 @@ import BriefSlider from '@/components/BriefSlider'
 import AdSpace from '@/components/AdSpace'
 import RadioCard from '@/components/RadioCard'
 import UpcomingEvent from '@/components/UpcomingEvent'
+import ElectionCountdown from '@/components/ElectionCountdown'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Article } from '@/types'
@@ -55,6 +56,11 @@ export default async function HomePage() {
       <div className="mt-[70px]">
         <BriefSlider />
       </div>
+
+      {/* Kenya 2027 General Election Countdown */}
+      <section className="max-w-[1400px] mx-auto px-6 pt-6" aria-label="Kenya 2027 General Election Countdown">
+        <ElectionCountdown />
+      </section>
 
       {/* Hero / Main News Section */}
       <section className="max-w-[1400px] mx-auto px-6 py-8">

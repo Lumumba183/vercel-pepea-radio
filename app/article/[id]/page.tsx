@@ -1,23 +1,65 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import PlayerBar from '@/components/PlayerBar'
+import ShareButtons from '@/components/ShareButtons'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Article } from '@/types'
 import { ArrowLeft, Clock, User, Image as ImageIcon } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { cache } from 'react'
+import type { Metadata } from 'next'
 
 interface Props {
   params: Promise<{ id: string }>
 }
 
-export default async function ArticlePage({ params }: Props) {
-  const { id } = await params
-  const { data: article } = await supabase
+const SITE_URL = 'https://www.pepearadioke.com'
+
+// Deduped between generateMetadata and the page render
+const getArticle = cache(async (id: string) => {
+  const { data } = await supabase
     .from('articles')
     .select('*')
     .eq('id', id)
     .single()
+  return data
+})
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params
+  const article = await getArticle(id)
+
+  if (!article) {
+    return { title: 'Article Not Found — Pepea Radio' }
+  }
+
+  const url = `${SITE_URL}/article/${id}`
+  const description = article.excerpt || `Read "${article.title}" on Pepea Radio — Sauti Ya Afrika.`
+
+  return {
+    title: `${article.title} — Pepea Radio`,
+    description,
+    openGraph: {
+      title: article.title,
+      description,
+      url,
+      siteName: 'Pepea Radio',
+      type: 'article',
+      images: article.image_url ? [{ url: article.image_url }] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description,
+      images: article.image_url ? [article.image_url] : [],
+    },
+  }
+}
+
+export default async function ArticlePage({ params }: Props) {
+  const { id } = await params
+  const article = await getArticle(id)
 
   if (!article) notFound()
 
@@ -56,10 +98,20 @@ export default async function ArticlePage({ params }: Props) {
               <span>{article.date ? new Date(article.date).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' }) : article.created_at ? new Date(article.created_at).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}</span>
               <span className="flex items-center gap-1"><Clock size={14} /> {article.read_time}</span>
             </div>
+            <div className="mt-5 pt-4 border-t border-[var(--border)]">
+              <ShareButtons title={article.title} path={`/article/${article.id}`} compact />
+            </div>
           </div>
         </div>
 
         <article className="max-w-[900px] mx-auto px-6 py-8 text-lg leading-relaxed text-[var(--text)] article-body" dangerouslySetInnerHTML={{ __html: article.content }} />
+
+        {/* Share bar — bottom of article */}
+        <div className="max-w-[900px] mx-auto px-6 pb-10">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl px-5 py-4 flex flex-wrap items-center justify-between gap-4">
+            <ShareButtons title={article.title} path={`/article/${article.id}`} />
+          </div>
+        </div>
 
         {related && related.length > 0 && (
           <div className="max-w-[900px] mx-auto px-6 pb-16">
