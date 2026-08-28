@@ -14,10 +14,56 @@ async function getSettings() {
   return data || { youtube_channel_id: '', twitch_channel: '', live_source: 'youtube' }
 }
 
+/**
+ * Extracts a clean Twitch channel username from various input formats:
+ * - "transtvkenya" → "transtvkenya"
+ * - "https://twitch.tv/transtvkenya" → "transtvkenya"
+ * - "http://twitch.tv/transtvkenya" → "transtvkenya"
+ * - "@transtvkenya" → "transtvkenya"
+ */
+function extractTwitchChannel(input: string): string {
+  if (!input) return ''
+  const trimmed = input.trim()
+  // If it looks like a URL, try to parse it
+  if (trimmed.includes('://') || trimmed.startsWith('//')) {
+    try {
+      const url = new URL(trimmed.startsWith('//') ? 'https:' + trimmed : trimmed)
+      const path = url.pathname.replace(/^\/+/, '') // strip leading slashes
+      const channel = path.split('/')[0]
+      return channel || ''
+    } catch {
+      // URL parse failed, fall through to raw cleanup
+    }
+  }
+  // Raw username: strip accidental @ prefix
+  return trimmed.replace(/^@/, '')
+}
+
+/**
+ * Builds a robust list of parent domains for Twitch embed.
+ * Twitch requires an EXACT match on the parent domain.
+ */
+function getParentDomains(host: string): string[] {
+  const clean = host.replace(/:\d+$/, '') // strip port (e.g. localhost:3000)
+  const domains = new Set<string>()
+  domains.add(clean)
+  // If host is www.*, also add bare domain; if bare, also add www.*
+  if (clean.startsWith('www.')) {
+    domains.add(clean.replace('www.', ''))
+  } else if (clean.includes('.') && !clean.includes('vercel.app') && !clean.includes('localhost')) {
+    domains.add('www.' + clean)
+  }
+  return Array.from(domains)
+}
+
 export default async function TvPage() {
   const settings = await getSettings()
   const headersList = await headers()
   const host = headersList.get('host') || 'vercel-pepea-radio.vercel.app'
+
+  const channel = extractTwitchChannel(settings.twitch_channel || '')
+  const parents = getParentDomains(host)
+  const parentParams = parents.map(p => `parent=${encodeURIComponent(p)}`).join('&')
 
   return (
     <>
@@ -32,27 +78,33 @@ export default async function TvPage() {
             <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4">
               <iframe
                 className="w-full h-full"
-                src={`https://www.youtube.com/embed/live_stream?channel=${settings.youtube_channel_id}&autoplay=0`}
+                src={`https://www.youtube.com/embed/live_stream?channel=${encodeURIComponent(settings.youtube_channel_id)}&autoplay=0`}
                 title="YouTube Live"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             </div>
-          ) : settings.live_source === 'twitch' && settings.twitch_channel ? (
+          ) : settings.live_source === 'twitch' && channel ? (
             <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4">
               <iframe
                 className="w-full h-full"
-                src={`https://player.twitch.tv/?channel=${settings.twitch_channel}&parent=${host}`}
+                src={`https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&${parentParams}&muted=true`}
                 title="Twitch Live"
+                allow="autoplay; encrypted-media; fullscreen"
                 allowFullScreen
+                referrerPolicy="origin"
               />
             </div>
           ) : (
             <div className="aspect-video bg-black rounded-lg flex items-center justify-center mb-4">
-              <div className="text-center">
+              <div className="text-center px-4">
                 <Play size={48} className="text-red-600 mx-auto mb-2" />
-                <p className="text-[var(--text-muted)]">Live stream embed area</p>
-                <p className="text-[var(--text-muted)] text-sm">Configure stream settings in admin panel</p>
+                <p className="text-[var(--text-muted)] font-medium">Live stream is currently offline</p>
+                <p className="text-[var(--text-muted)] text-sm mt-1">
+                  {settings.live_source === 'twitch'
+                    ? 'No Twitch channel configured. Please set one in the admin panel.'
+                    : 'No YouTube channel configured. Please set one in the admin panel.'}
+                </p>
               </div>
             </div>
           )}
@@ -74,8 +126,8 @@ export default async function TvPage() {
                   ? settings.youtube_channel_id
                     ? `Channel: ${settings.youtube_channel_id}`
                     : 'No YouTube channel configured'
-                  : settings.twitch_channel
-                    ? `Channel: ${settings.twitch_channel}`
+                  : channel
+                    ? `Channel: ${channel}`
                     : 'No Twitch channel configured'}
               </p>
             </div>
