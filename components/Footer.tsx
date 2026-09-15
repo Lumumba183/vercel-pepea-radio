@@ -6,7 +6,7 @@ import { Facebook, Twitter, Instagram, Youtube, MessageCircle } from 'lucide-rea
 export default function Footer() {
   return (
     <footer className="bg-[var(--bg-light)] border-t border-[var(--border)] pt-12 pb-6 px-6">
-      <div className="max-w-[1400px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
         <div>
           <h4 className="text-base font-bold mb-4 text-[var(--text)]">Pepea Radio</h4>
           <p className="text-[var(--text-muted)] text-[0.9375rem]">
@@ -46,6 +46,12 @@ export default function Footer() {
           <Link href="/admin" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">Staff Login</Link>
         </div>
         <div>
+          <h4 className="text-base font-bold mb-4 text-[var(--text)]">Legal</h4>
+          <Link href="/privacy" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">Privacy Policy</Link>
+          <Link href="/terms" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">Terms of Service</Link>
+          <Link href="/cookies" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">Cookie Policy</Link>
+        </div>
+        <div>
           <h4 className="text-base font-bold mb-4 text-[var(--text)]">Contact Us</h4>
           <a href="tel:+254726846053" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-blue-600">📞 +254 726 846 053</a>
           <a href="https://wa.me/254726639789" target="_blank" rel="noopener noreferrer" className="block text-[var(--text-muted)] no-underline py-1 text-[0.9375rem] transition-all hover:text-green-600">💬 WhatsApp: +254 726 639 789</a>
@@ -54,6 +60,11 @@ export default function Footer() {
         </div>
       </div>
       <div className="max-w-[1400px] mx-auto border-t border-[var(--border)] pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex gap-4 text-sm">
+          <Link href="/privacy" className="text-[var(--text-muted)] no-underline transition-all hover:text-blue-600">Privacy</Link>
+          <Link href="/terms" className="text-[var(--text-muted)] no-underline transition-all hover:text-blue-600">Terms</Link>
+          <Link href="/cookies" className="text-[var(--text-muted)] no-underline transition-all hover:text-blue-600">Cookies</Link>
+        </div>
         <p className="text-[var(--text-muted)] text-sm">Powered by <a href="https://www.nexaflow-digital.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 no-underline hover:underline">NexaFlow Digital</a> | Pepea Radio — Sauti Ya Afrika</p>
         <div className="inline-flex items-center gap-1.5 bg-[rgba(220,38,38,0.15)] text-red-600 px-3 py-1.5 rounded-full text-xs font-bold uppercase border border-[rgba(220,38,38,0.3)] animate-[pulse-red_2s_infinite]">
           <span className="w-1.5 h-1.5 bg-red-600 rounded-full inline-block" />
