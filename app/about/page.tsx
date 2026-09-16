@@ -82,6 +82,24 @@ export default function AboutPage() {
                       <p className="text-sm text-[var(--text-muted)]">Director</p>
                     </div>
                   </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border border-red-600/30">
+                      <img src="/chrispinus-shikuku.jpg" alt="Chrispinus Shikuku" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">Chrispinus Shikuku <span className="text-[var(--text-muted)] font-normal">“Papa Chris”</span></p>
+                      <p className="text-sm text-[var(--text-muted)]">Radio Host & Sports Presenter</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border border-red-600/30">
+                      <img src="/damaris-muchika.jpg" alt="Damaris Muchika" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">Damaris Muchika <span className="text-[var(--text-muted)] font-normal">“Tammy Tamara”</span></p>
+                      <p className="text-sm text-[var(--text-muted)]">Administrator & Rhumba Presenter</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -209,6 +227,168 @@ export default function AboutPage() {
                 <p className="font-semibold text-sm">{value.label}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Chrispinus Shikuku Profile */}
+        <section className="px-6 py-16">
+          <div className="max-w-[1100px] mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-4xl font-black mb-2">Chrispinus Shikuku <span className="text-2xl font-bold text-[var(--text-muted)]">“Papa Chris”</span></h2>
+              <p className="text-xl text-[var(--text-muted)]">Radio Host, Sports Presenter & Voice of the Youth</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Bio Card */}
+              <div className="lg:col-span-1">
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 text-center">
+                  <div className="w-32 h-32 mx-auto rounded-full overflow-hidden mb-4 border-2 border-red-600/30">
+                    <img
+                      src="/chrispinus-shikuku.jpg"
+                      alt="Chrispinus Shikuku"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-1">Chrispinus Shikuku</h3>
+                  <p className="text-[var(--text-muted)] text-sm mb-4">“Papa Chris” — Radio Host & Sports Presenter</p>
+
+                  <div className="space-y-2 text-left text-sm">
+                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                      <MapPin size={14} className="text-red-600" />
+                      <span>Malava, Kakamega — Western Kenya</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                      <CalendarIcon size={14} className="text-blue-600" />
+                      <span>Born: 1998</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                      <Award size={14} className="text-gold" />
+                      <span>Cert. Journalism & Media Studies</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expertise */}
+                <div className="mt-4 bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+                  <h4 className="font-bold mb-3 text-sm uppercase tracking-wider text-[var(--text-muted)]">Expertise</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {['Radio Hosting', 'Sports Commentary', 'Live Presentation', 'Swahili & Luhya Broadcasts', 'Research', 'Public Relations', 'Youth Programming', 'Brand Building'].map((skill) => (
+                      <span key={skill} className="px-2 py-1 bg-[var(--bg-light)] border border-[var(--border)] rounded text-xs text-[var(--text-muted)]">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Story */}
+              <div className="lg:col-span-2 space-y-6 text-[var(--text-muted)] leading-relaxed">
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+                  <h3 className="text-xl font-bold mb-4 text-[var(--text)]">Early Life & Education</h3>
+                  <p>
+                    Chrispinus Shikuku, popularly known on air as <strong className="text-[var(--text)]">“Papa Chris”</strong>, was born in 1998 in Malava, Kakamega County, in Kenya&apos;s Western region. He began his education at <strong className="text-[var(--text)]">Shamberere Primary School</strong> before proceeding to <strong className="text-[var(--text)]">Mukhonje K Mixed Secondary School</strong>.
+                  </p>
+                  <p className="mt-3">
+                    Driven by a deep passion for media and storytelling, he joined <strong className="text-[var(--text)]">Sigalagala National Polytechnic</strong>, where he earned a <strong className="text-[var(--text)]">Certificate in Journalism and Media Studies (2023–2024)</strong>. His training gave him a strong foundation in broadcasting, reporting, and media production.
+                  </p>
+                </div>
+
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+                  <h3 className="text-xl font-bold mb-4 text-[var(--text)]">Career Journey</h3>
+                  <p>
+                    Papa Chris honed his craft at <strong className="text-[var(--text)]">Lubao FM</strong>, where he served as a radio host across a wide range of programming — from morning shows, Luhya cultural programmes, and the youth-focused <strong className="text-[var(--text)]">Breakfast Show</strong>, to afternoon and evening shows. Broadcasting in both <strong className="text-[var(--text)]">Swahili and Luhya</strong>, he connected effortlessly with audiences across Western Kenya.
+                  </p>
+                  <p className="mt-3">
+                    Beyond music and talk, he made his mark in sports — as a <strong className="text-[var(--text)]">sports show host, football commentator, sports analyst, and reporter</strong>. His energetic, insightful coverage earned him a loyal following among sports fans.
+                  </p>
+                </div>
+
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+                  <h3 className="text-xl font-bold mb-4 text-[var(--text)]">Impact & Recognition</h3>
+                  <p>
+                    Passionate, innovative, and skilled in public relations, Papa Chris has hosted <strong className="text-[var(--text)]">prominent leaders, artists, politicians, and sports legends</strong> on his shows. As a young broadcaster, he has inspired many youths to pursue careers in the media industry, and continues to grow as a distinctive voice and brand in Kenyan radio.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Damaris Muchika Profile */}
+        <section className="bg-gradient-to-br from-[var(--bg)] via-[#0f172a] to-[var(--bg-light)] px-6 py-16">
+          <div className="max-w-[1100px] mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-4xl font-black mb-2">Damaris Muchika <span className="text-2xl font-bold text-[var(--text-muted)]">“Tammy Tamara”</span></h2>
+              <p className="text-xl text-[var(--text-muted)]">Administrator & Rhumba Presenter</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Bio Card */}
+              <div className="lg:col-span-1">
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 text-center">
+                  <div className="w-32 h-32 mx-auto rounded-full overflow-hidden mb-4 border-2 border-red-600/30">
+                    <img
+                      src="/damaris-muchika.jpg"
+                      alt="Damaris Muchika"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-1">Damaris Muchika</h3>
+                  <p className="text-[var(--text-muted)] text-sm mb-4">“Tammy Tamara” — Administrator & Rhumba Presenter</p>
+
+                  <div className="space-y-2 text-left text-sm">
+                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                      <Award size={14} className="text-gold" />
+                      <span>Company Administrator</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                      <MapPin size={14} className="text-red-600" />
+                      <span>Western Kenya & Nairobi</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                      <Music size={14} className="text-blue-600" />
+                      <span>Stage Name: Tammy Tamara</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expertise */}
+                <div className="mt-4 bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+                  <h4 className="font-bold mb-3 text-sm uppercase tracking-wider text-[var(--text-muted)]">Expertise</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {['Administration', 'Rhumba Presentation', 'Event Hosting', 'Artist Promotion', 'Corporate Relations', 'Community Engagement', 'Media Operations'].map((skill) => (
+                      <span key={skill} className="px-2 py-1 bg-[var(--bg-light)] border border-[var(--border)] rounded text-xs text-[var(--text-muted)]">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Story */}
+              <div className="lg:col-span-2 space-y-6 text-[var(--text-muted)] leading-relaxed">
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+                  <h3 className="text-xl font-bold mb-4 text-[var(--text)]">Role at Pepea Radio</h3>
+                  <p>
+                    Damaris Muchika serves as <strong className="text-[var(--text)]">Company Administrator</strong> at Pepea Radio, overseeing the organization&apos;s day-to-day operations. She is one of the pillars of the station — the steady hand behind the scenes who keeps everything running smoothly.
+                  </p>
+                </div>
+
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+                  <h3 className="text-xl font-bold mb-4 text-[var(--text)]">Media & Rhumba Career</h3>
+                  <p>
+                    Widely known by her stage name <strong className="text-[var(--text)]">Tammy Tamara</strong>, she is a celebrated rhumba presenter and promoter with extensive experience across media houses in both <strong className="text-[var(--text)]">Western Kenya and Nairobi</strong>. Her name carries weight in the entertainment industry, where she is admired for her deep connection with artists, fans, and the rhumba community.
+                  </p>
+                </div>
+
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+                  <h3 className="text-xl font-bold mb-4 text-[var(--text)]">Community & Corporate Relations</h3>
+                  <p>
+                    Damaris is widely recognized for her strong ties with both the <strong className="text-[var(--text)]">community and corporate partners</strong>. Her professionalism, warmth, and welcoming nature make her a key asset to the company — always ready to serve its best interests, on air, on stage, and behind the scenes.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
